@@ -215,19 +215,7 @@ export default class WebHooks {
   async asaas(object: { payment: any }, authenticityToken: string | undefined) {
     try {
       console.log('[ASAAS_WEBHOOK] - Notificatio received: ', object);
-      let asaasAuthenticityToken = process.env.ASAAS_AUTHENTICITY_TOKEN;
-      if (process.env.NODE_ENV === 'production') {
-        const settingsModel = await DBModels.SettingModel.findOne({
-          where: {
-            name: 'asaasAuthenticityToken',
-          },
-        });
-        if (settingsModel) {
-          asaasAuthenticityToken = settingsModel.value;
-        } else {
-          asaasAuthenticityToken = uuidV4();
-        }
-      }
+      const asaasAuthenticityToken = process.env.ASAAS_AUTHENTICITY_TOKEN;
       if (authenticityToken !== asaasAuthenticityToken) {
         return false;
       }
