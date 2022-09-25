@@ -132,3 +132,9 @@ spec:
                   name: environment
                   key: PAGSEGURO_TOKEN
                   optional: false
+            - name: PAGSEGURO_APP
+              valueFrom:
+                secretKeyRef:
+                  name: environment
+                  key: PAGSEGURO_APP
+                  optional: false
