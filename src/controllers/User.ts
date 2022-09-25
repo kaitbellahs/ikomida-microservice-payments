@@ -70,7 +70,7 @@ export default class User {
       const coupon = Types.Classes.CCoupon.init(couponModels?.[0]?.name ?? '', couponModels?.[0]?.value ?? 0, couponModels?.[0]?.valueType ?? Types.Types.TDiscount.NO, undefined, undefined, undefined, couponModels?.[0]?.id);
       return new Utils.Return(true, coupon);
     } catch (exception: any) {
-      console.error(exception);
+      this.logger.error(exception);
       const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_ERROR);
       return error.logAndReturn(this.logger);
     }
@@ -92,9 +92,9 @@ export default class User {
           return Types.Classes.CPaymentMethod.init(
             paymentMethodModel?.type ?? Types.Types.TPaymentMethod.CASH_ON_DELIVERY,
             paymentMethodModel?.brand ?? '-',
-            paymentMethodModel?.lastDigits ?? 0,
+            paymentMethodModel?.lastDigits ?? '',
+            paymentMethodModel?.firstDigits,
             isOnlineCreditCard && paymentMethodModel?.selected,
-            undefined,
             paymentMethodModel?.createdAt,
             paymentMethodModel?.id,
           );
@@ -105,9 +105,9 @@ export default class User {
             Types.Classes.CPaymentMethod.init(
               supportedPaymentMethodType,
               '',
-              0,
-              userPreferredPaymentMethodType === supportedPaymentMethodType,
+              '',
               undefined,
+              userPreferredPaymentMethodType === supportedPaymentMethodType,
               userModel?.createdAt,
               supportedPaymentMethodType.id,
             ),
@@ -204,7 +204,7 @@ export default class User {
         await amqp?.publish(Domain.RabbitMQ.PAYMENT_QUEUE, paymentPayload);
         await amqp?.close();
       } catch (exception: any) {
-        console.error(exception);
+        this.logger.error(exception);
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_CANT_ADD_TO_CANCEL_QUEUE);
         error.log(this.logger);
       }

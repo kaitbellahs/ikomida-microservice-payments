@@ -15,7 +15,7 @@ export default class WebHooks {
   async pagseguro(contractID: string, input: any, authenticityToken?: string) {
     try {
       const payload: Types.Classes.Pagseguro.CPagSeguroChargeResponse = Types.Classes.Pagseguro.CPagSeguroChargeResponse.fromObject(input);
-      console.log('--pagSegroWebHook:', contractID, payload.toJSON(), authenticityToken);
+      this.logger.log('--pagSegroWebHook:', contractID, payload.toJSON(), authenticityToken);
 
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -59,7 +59,6 @@ export default class WebHooks {
       let userPaymentModel;
       let sendPN = false;
       const paymentStatus = paymentObject.status;
-      console.log('paymentStatus', paymentStatus)
       if (paymentObject) {
         const userPaymentModels = await contractModel.$get('userPayments', {
           where: {
@@ -96,7 +95,6 @@ export default class WebHooks {
         }
       }
       const order = userPaymentModel?.order;
-      console.log('order', order?.status)
       if (!order) {
         return false;
       }
@@ -196,7 +194,7 @@ export default class WebHooks {
           await amqp?.close();
         }
       } catch (exception: any) {
-        console.error(exception);
+        this.logger.error(exception);
         const error = new Utils.iKomidaError(
           Utils.iKomidaError.IKOMIDA_ORDERS_SERVICE_PAGSEGURO_WEBHOOK_PUSH_NOTIFICATION_EXCEPTION_2,
           exception,
@@ -204,7 +202,7 @@ export default class WebHooks {
         error.log(this.logger);
       }
     } catch (exception: any) {
-      console.error(exception);
+      this.logger.error(exception);
       const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PAGSEGUROWEBHOOK_EXCEPTION, exception);
       error.log(this.logger);
       return false;
@@ -214,7 +212,7 @@ export default class WebHooks {
 
   async asaas(object: { payment: any }, authenticityToken: string | undefined) {
     try {
-      console.log('[ASAAS_WEBHOOK] - Notificatio received: ', object);
+      this.logger.log('[ASAAS_WEBHOOK] - Notificatio received: ', object);
       const asaasAuthenticityToken = process.env.ASAAS_AUTHENTICITY_TOKEN;
       if (authenticityToken !== asaasAuthenticityToken) {
         return false;
@@ -268,7 +266,7 @@ export default class WebHooks {
         return false;
       }
       const subscription = subscriptionResponse.data;
-      console.log('[ASAAS_WEBHOOK] - subscription:', subscription);
+      this.logger.log('[ASAAS_WEBHOOK] - subscription:', subscription);
       if (!contractPaymentSignature) {
         this.logger.log('[ASAAS_WEBHOOK] - create Contract Payment Signature not found, recuvering...');
         contractPaymentSignature = await contractModel.$create('contractPaymentSignature', {
@@ -371,7 +369,7 @@ export default class WebHooks {
           this.logger.warn(`[ASAAS_WEBHOOK] - Dispositivo ou usuário não cadastrado para receber notificações push.`);
         }
       } catch (exception: any) {
-        console.error(exception);
+        this.logger.error(exception);
         const error = new Utils.iKomidaError(
           Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ASAASWEBHOOK_PUSH_NOTIFICATION_EXCEPTION,
           exception,
@@ -379,7 +377,7 @@ export default class WebHooks {
         error.log(this.logger);
       }
     } catch (exception: any) {
-      console.error(exception);
+      this.logger.error(exception);
       const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ASAASWEBHOOK_EXCEPTION, exception);
       error.log(this.logger);
       return false;

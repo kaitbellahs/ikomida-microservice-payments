@@ -63,7 +63,7 @@ export default class Vendor {
       });
       return new Utils.Return(true);
     } catch (e) {
-      console.error(e);
+      this.logger.error(e);
     }
     return new Utils.Return(false);
   }
@@ -111,7 +111,7 @@ export default class Vendor {
       await couponModels[0].destroy();
       return new Utils.Return(true);
     } catch (exception: any) {
-      console.error(exception);
+      this.logger.error(exception);
       return new Utils.Return(false);
     }
   }
@@ -181,7 +181,7 @@ export default class Vendor {
         coupons?.sort((item1, item2) => (item2?.timestamp ?? 0) - (item1?.timestamp ?? 0)),
       );
     } catch (exception: any) {
-      console.error(exception);
+      this.logger.error(exception);
       return new Utils.Return(false);
     }
   }
@@ -302,7 +302,7 @@ export default class Vendor {
       );
       return new Utils.Return(true, subscriptionObject);
     } catch (exception: any) {
-      console.warn(exception);
+      this.logger.warn(exception);
       const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION, exception);
       return error.logAndReturn(this.logger);
     }
