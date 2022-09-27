@@ -215,6 +215,7 @@ export default class WebHooks {
       this.logger.log('[ASAAS_WEBHOOK] - Notificatio received: ', object);
       const asaasAuthenticityToken = process.env.ASAAS_AUTHENTICITY_TOKEN;
       if (authenticityToken !== asaasAuthenticityToken) {
+        this.logger.log(`[ASAAS_WEBHOOK] - invalid authenticity Token: ${authenticityToken}`);
         return false;
       }
       const paymentObject = object?.payment;
