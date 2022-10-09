@@ -209,12 +209,12 @@ export default class Payments {
           lastDigits: userCreditCard?.lastDigits,
           gatewayPaymentID: chargeResult.id,
           orderID: chargeResult.reference,
-          amount: chargeResult.amount
+          amount: chargeResult.amount,
+          contractId: contractModel.id,
+          userCreditCardId: userCreditCard.id
         },
         { transaction }
       )
-      await contractModel.$add('userPayment', userPaymentModel, { transaction })
-      await userCreditCard?.$add('userPayment', userPaymentModel, { transaction })
       await transaction.commit()
       return new Utils.Return(true, Types.Classes.CProcessPaymentResponse.init(userPaymentModel.id))
     } catch (exception: any) {
