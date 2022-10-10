@@ -63,6 +63,7 @@ export default class Payments {
         )
       }
       const userPaymentModels = await contractModel?.$get('userPayments', {
+        transaction,
         where: {
           gateway: paymentGateway.constructor.name,
           id: object.id
@@ -103,7 +104,9 @@ export default class Payments {
     }
   }
   async processPayment(identity: Types.Classes.CUser, input: any) {
-    const transaction = await Domain.SqlDB.sequelize.transaction()
+    const transaction = await Domain.SqlDB.sequelize.transaction({
+      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED
+    })
     try {
       const object: Types.Classes.CProcessPayment = Types.Classes.CProcessPayment.fromObject(input)
       this.logger.info('---processPayment')
@@ -185,7 +188,7 @@ export default class Payments {
       }
       const chargeObject: Types.Classes.Pagseguro.CPagSeguroCreateCharge =
         Types.Classes.Pagseguro.CPagSeguroCreateCharge.init(
-          object?.referenceId,
+          object.referenceId,
           object.amount,
           userCreditCard.type.pagseguro,
           slugging(vendorSettingsModel?.contractName),
