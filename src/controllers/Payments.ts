@@ -8,7 +8,10 @@ export default class Payments {
   }
 
   async cancelPayment(identity: Types.Classes.CUser, input: any) {
-    const transaction = await Domain.SqlDB.sequelize.transaction()
+    const transaction = await Domain.SqlDB.sequelize.transaction({
+      autocommit: false,
+      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.SERIALIZABLE
+    })
     try {
       this.logger.info('---cancelPayment')
       const object: Types.Classes.CProcessPaymentResponse = Types.Classes.CProcessPaymentResponse.fromObject(input)
@@ -105,7 +108,9 @@ export default class Payments {
   }
   async processPayment(identity: Types.Classes.CUser, input: any) {
     const transaction = await Domain.SqlDB.sequelize.transaction({
-      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED
+      logging: console.log,
+      autocommit: false,
+      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.SERIALIZABLE
     })
     try {
       const object: Types.Classes.CProcessPayment = Types.Classes.CProcessPayment.fromObject(input)
@@ -114,6 +119,7 @@ export default class Payments {
         where: {
           ikomidaID: identity.ikomidaID
         },
+        logging: console.log,
         transaction,
         include: [
           {
@@ -216,7 +222,9 @@ export default class Payments {
           contractId: contractModel.id,
           userCreditCardId: userCreditCard.id
         },
-        { transaction }
+        {
+          logging: console.log, transaction
+        }
       )
       await transaction.commit()
       return new Utils.Return(true, Types.Classes.CProcessPaymentResponse.init(userPaymentModel.id))
