@@ -1,5 +1,4 @@
 import { Types, Domain, Utils, BackendTypes, Helpers, DBModels, slugging, objHasProp } from '@ikomida/shared-backend'
-import { Transaction } from 'sequelize'
 
 export default class Payments {
   logger
@@ -64,6 +63,7 @@ export default class Payments {
         )
       }
       const userPaymentModels = await contractModel?.$get('userPayments', {
+        transaction,
         where: {
           gateway: paymentGateway.constructor.name,
           id: object.id
@@ -104,7 +104,9 @@ export default class Payments {
     }
   }
   async processPayment(identity: Types.Classes.CUser, input: any) {
-    const transaction = await Domain.SqlDB.sequelize.transaction({ isolationLevel: Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED })
+    const transaction = await Domain.SqlDB.sequelize.transaction({
+      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.READ_UNCOMMITTED
+    })
     try {
       const object: Types.Classes.CProcessPayment = Types.Classes.CProcessPayment.fromObject(input)
       this.logger.info('---processPayment')
