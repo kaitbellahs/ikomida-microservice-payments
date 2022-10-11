@@ -213,13 +213,13 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@ikomida/shared-backend@^1.0.5":
-  version "1.0.5"
-  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.5.tgz#67c09d346e05af7880412be700fdb079ee51993a"
-  integrity sha512-4H68gy702watJu18hKjhdZEUDcwZmCd3Ue5rAFMJT0zY8dSo2mwfLqKr3pSPILwRgsKdz7r65RZQTzazuSfNEQ==
+"@ikomida/shared-backend@^1.0.6":
+  version "1.0.6"
+  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.6.tgz#d6334cfa8bdd6e1c03732b939459321217f8ece4"
+  integrity sha512-ujcd97JDJmnvK+EsnGBkxnObZZ0f/NtAt23+qsAt0JuUXPh3hDw3tpmWwj3DGXScQeHPwEdVe3VPYXhaEvT0jQ==
   dependencies:
     "@ikomida/shared-logics" "^0.2.3"
-    "@ikomida/shared-types" "^1.2.1"
+    "@ikomida/shared-types" "^1.2.2"
     amqplib "^0.10.3"
     axios "^1.1.2"
     bcrypt "^5.1.0"
@@ -229,7 +229,7 @@
     mysql2 "^2.3.3"
     node-mailjet "^5.1.1"
     reflect-metadata "^0.1.13"
-    sequelize "^6.24.0"
+    sequelize "^6.25.0"
     sequelize-typescript "^2.1.3"
     sharp "^0.31.1"
     uuid "^9.0.0"
@@ -242,10 +242,10 @@
   dependencies:
     luxon "^3.0.4"
 
-"@ikomida/shared-types@^1.2.1":
-  version "1.2.1"
-  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-types/-/@ikomida/shared-types-1.2.1.tgz#a5cd3b98edcecb2216dd74abcdd0daca517f43cc"
-  integrity sha512-wx0f/s2EEk5W8aNaTOGYIqwkXflvIQ08A0k9JLExEl4pYc9Y8eaeNzPYrl1VcAXlETSSmiCRuE5oyV1e6LPcWw==
+"@ikomida/shared-types@^1.2.2":
+  version "1.2.2"
+  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-types/-/@ikomida/shared-types-1.2.2.tgz#d79cee78ec11e395b049b8611699dae112d2d07d"
+  integrity sha512-g+7pk73YGukQ1tbwaNjFpRYDNPKJ7DujEOWwrwWg1texGFXuka1U35K7epP0lhvaquqJ9o6f4D3p3zyltVgUcg==
 
 "@jridgewell/gen-mapping@^0.3.0":
   version "0.3.2"
@@ -447,10 +447,10 @@
     is-module "^1.0.0"
     resolve "^1.22.1"
 
-"@rollup/plugin-typescript@^9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-9.0.0.tgz#ab7267b1df7a578f2786e4b24100dee001856a4a"
-  integrity sha512-zGTFF6bt/Vl9LzsBfKsqNu01G3ILNhwmkGP/zciLv4bQ2JPNIAJEBabph4S8aq3pdhDNdm1ISUMQ9rBDzLIqLA==
+"@rollup/plugin-typescript@^9.0.1":
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-typescript/-/plugin-typescript-9.0.1.tgz#3358c78be36aecacb045c76433af06f4428588a2"
+  integrity sha512-fj+CTk8+HvFCEwwDQdNgWd0lIJVXtMQ0Z3vH/ZgzFSbK2s1zs5wjZrjzrhViTTN+UF49+P69/tybgKRdGHpj/Q==
   dependencies:
     "@rollup/pluginutils" "^4.2.1"
     resolve "^1.22.1"
@@ -643,10 +643,10 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.20.24.tgz#c37ac69cb2948afb4cef95f424fa0037971a9a5c"
   integrity sha512-yxDeaQIAJlMav7fH5AQqPH1u8YIuhYJXYBzxaQ4PifsU0GDO38MSdmEDeRlIxrKbC6NbEaaEHDanWb+y30U8SQ==
 
-"@types/node@^18.8.3":
-  version "18.8.3"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.3.tgz#ce750ab4017effa51aed6a7230651778d54e327c"
-  integrity sha512-0os9vz6BpGwxGe9LOhgP/ncvYN5Tx1fNcd2TM3rD/aCGBkysb+ZWpXEocG24h6ZzOi13+VB8HndAQFezsSOw1w==
+"@types/node@^18.8.4":
+  version "18.8.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.8.4.tgz#54be907698f40de8a45770b48486aa3cbd3adff7"
+  integrity sha512-WdlVphvfR/GJCLEMbNA8lJ0lhFNBj4SW3O+O5/cEGw9oYrv0al9zTwuQsq+myDUXgNx2jgBynoVgZ2MMJ6pbow==
 
 "@types/qs@*":
   version "6.9.7"
@@ -3443,10 +3443,10 @@ rollup-plugin-terser@^7.0.2:
     serialize-javascript "^4.0.0"
     terser "^5.0.0"
 
-rollup@^2.79.1:
-  version "2.79.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.79.1.tgz#bedee8faef7c9f93a2647ac0108748f497f081c7"
-  integrity sha512-uKxbd0IhMZOhjAiD5oAFp7BqvkA4Dv47qpOCtaNvng4HBwdbWtdOh8f5nZNuk2rp51PMGk3bzfWu5oayNEuYnw==
+rollup@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.0.0.tgz#3e12b7cc4843615c855288c091686256c0a8e09d"
+  integrity sha512-iVomS2lySi4BM2QJb7lGZBjSndUEs6Ip+VDl25jcbM99VI5vWeEitvUSiNQkQkwqEiI4515m5shjyuwPcXS5Dg==
   optionalDependencies:
     fsevents "~2.3.2"
 
@@ -3542,10 +3542,10 @@ sequelize-typescript@^2.1.3:
   dependencies:
     glob "7.2.0"
 
-sequelize@^6.24.0:
-  version "6.24.0"
-  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.24.0.tgz#ae5c60a54f10c3bdf1c57318a72b224bad306956"
-  integrity sha512-mPo7Q7gWkrsstjR2aw8ahkrj8RUJCozz3kedAz2B5ZIdLoQEH1z2tvaeJONI8R6RqeuyRQosx9Yn3s9yQyo6lQ==
+sequelize@^6.25.0:
+  version "6.25.0"
+  resolved "https://registry.yarnpkg.com/sequelize/-/sequelize-6.25.0.tgz#957c2c7a90a5fcd544cf92903715593e49002c8b"
+  integrity sha512-Bu2V+Yjw/4fwGve0rwk02jmbuA0JGGGD1N7yrfGQXVRD91hg4j9Ecth4NwnK4fX1MQA4R0Cqfx3BaJDAOoaiSA==
   dependencies:
     "@types/debug" "^4.1.7"
     "@types/validator" "^13.7.1"
@@ -3972,10 +3972,10 @@ type-is@~1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
-typedoc@^0.23.15:
-  version "0.23.15"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.23.15.tgz#6d995c47d34e5785dadffe0ebc28372bd019e5e5"
-  integrity sha512-x9Zu+tTnwxb9YdVr+zvX7LYzyBl1nieOr6lrSHbHsA22/RJK2m4Y525WIg5Mj4jWCmfL47v6f4hUzY7EIuwS5w==
+typedoc@^0.23.16:
+  version "0.23.16"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.23.16.tgz#09881ada725c2190ac5d3bb0edadcc5bfeda4bfe"
+  integrity sha512-rumYsCeNRXlyuZVzefD7050n7ptL2uudsCJg50dY0v/stKniqIlRpvx/F/6expC0/Q6Dbab+g/JpZuB7Sw90FA==
   dependencies:
     lunr "^2.3.9"
     marked "^4.0.19"
