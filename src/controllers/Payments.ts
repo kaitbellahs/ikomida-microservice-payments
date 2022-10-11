@@ -8,10 +8,6 @@ export default class Payments {
   }
 
   async cancelPayment(identity: Types.Classes.CUser, input: any) {
-    const transaction = await Domain.SqlDB.sequelize.transaction({
-      autocommit: false,
-      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.SERIALIZABLE
-    })
     try {
       this.logger.info('---cancelPayment')
       const object: Types.Classes.CProcessPaymentResponse = Types.Classes.CProcessPaymentResponse.fromObject(input)
@@ -19,7 +15,6 @@ export default class Payments {
         where: {
           ikomidaID: identity.ikomidaID
         },
-        transaction,
         include: [
           {
             model: DBModels.UserModel,
@@ -66,7 +61,6 @@ export default class Payments {
         )
       }
       const userPaymentModels = await contractModel?.$get('userPayments', {
-        transaction,
         where: {
           gateway: paymentGateway.constructor.name,
           id: object.id
@@ -94,11 +88,9 @@ export default class Payments {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_RESPONSE_ERROR)
       }
       userPaymentModel.status = cancelCharge.status
-      userPaymentModel.save({ transaction })
-      await transaction.commit()
+      userPaymentModel.save()
       return new Utils.Return(true, cancelCharge)
     } catch (exception: any) {
-      await transaction.rollback()
       let error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PRODUCTS_SERVICE_NEW_PRODUCT_EXCEPTION, exception)
       if (exception instanceof Utils.iKomidaError) {
         error = exception
@@ -107,11 +99,6 @@ export default class Payments {
     }
   }
   async processPayment(identity: Types.Classes.CUser, input: any) {
-    const transaction = await Domain.SqlDB.sequelize.transaction({
-      logging: console.log,
-      autocommit: false,
-      isolationLevel: Domain.SqlDB.Transaction.ISOLATION_LEVELS.SERIALIZABLE
-    })
     try {
       const object: Types.Classes.CProcessPayment = Types.Classes.CProcessPayment.fromObject(input)
       this.logger.info('---processPayment')
@@ -119,8 +106,6 @@ export default class Payments {
         where: {
           ikomidaID: identity.ikomidaID
         },
-        logging: console.log,
-        transaction,
         include: [
           {
             model: DBModels.UserModel,
@@ -208,28 +193,20 @@ export default class Payments {
       if (!chargeResult) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      const userPaymentModel = await userModel.$create(
-        'userPayment',
-        {
-          status: chargeResult.status,
-          gateway: paymentGateway.constructor.name,
-          brand: userCreditCard?.brand,
-          firstDigits: userCreditCard?.firstDigits,
-          lastDigits: userCreditCard?.lastDigits,
-          gatewayPaymentID: chargeResult.id,
-          orderID: chargeResult.reference,
-          amount: chargeResult.amount,
-          contractId: contractModel.id,
-          userCreditCardId: userCreditCard.id
-        },
-        {
-          logging: console.log, transaction
-        }
-      )
-      await transaction.commit()
+      const userPaymentModel = await userModel.$create('userPayment', {
+        status: chargeResult.status,
+        gateway: paymentGateway.constructor.name,
+        brand: userCreditCard?.brand,
+        firstDigits: userCreditCard?.firstDigits,
+        lastDigits: userCreditCard?.lastDigits,
+        gatewayPaymentID: chargeResult.id,
+        orderID: chargeResult.reference,
+        amount: chargeResult.amount,
+        contractId: contractModel.id,
+        userCreditCardId: userCreditCard.id
+      })
       return new Utils.Return(true, Types.Classes.CProcessPaymentResponse.init(userPaymentModel.id))
     } catch (exception: any) {
-      await transaction.rollback()
       let error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PRODUCTS_SERVICE_NEW_PRODUCT_EXCEPTION, exception)
       if (exception instanceof Utils.iKomidaError) {
         error = exception
