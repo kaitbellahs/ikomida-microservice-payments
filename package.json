@@ -1,6 +1,6 @@
 {
   "name": "ikomida-payments-service",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "ikomida payments service",
   "private": true,
   "module": "build/service.js",
@@ -27,7 +27,7 @@
   "author": "Khalid Ait Bellahs",
   "license": "UNLICENSED",
   "dependencies": {
-    "@ikomida/shared-backend": "^1.0.6",
+    "@ikomida/shared-backend": "^1.0.7",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "express": "^4.18.2",
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@firebase/app-types": "0.x",
-    "@microsoft/api-extractor": "^7.32.1",
+    "@microsoft/api-extractor": "^7.33.0",
     "@rollup/plugin-json": "^5.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-typescript": "^9.0.1",
