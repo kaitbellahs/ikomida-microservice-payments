@@ -213,10 +213,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@ikomida/shared-backend@^1.0.6":
-  version "1.0.6"
-  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.6.tgz#d6334cfa8bdd6e1c03732b939459321217f8ece4"
-  integrity sha512-ujcd97JDJmnvK+EsnGBkxnObZZ0f/NtAt23+qsAt0JuUXPh3hDw3tpmWwj3DGXScQeHPwEdVe3VPYXhaEvT0jQ==
+"@ikomida/shared-backend@^1.0.7":
+  version "1.0.7"
+  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.7.tgz#a245772622b2b6941e49848aa9dc78314089def5"
+  integrity sha512-Rr6Vko97NkqzxjyRpcgE1IEu4XlhTTSqcaxemk+o8TM3KZPgPnJ7Y2B+ooTsJjDRzrUky/F22jt4e9dC1iieyg==
   dependencies:
     "@ikomida/shared-logics" "^0.2.3"
     "@ikomida/shared-types" "^1.2.2"
@@ -302,21 +302,21 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@microsoft/api-extractor-model@7.24.4":
-  version "7.24.4"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.24.4.tgz#a986b98d5a2afc736356c93dd5b521ca7c140cd8"
-  integrity sha512-xYzRQqxurZVrmEM14BJ2aZqAUq+K46EAFj2Qlf0GkVPSFy1vP4Qf3sa2AbBi26Up2QsSicEVdqcd44eeVt9k9Q==
+"@microsoft/api-extractor-model@7.25.0":
+  version "7.25.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor-model/-/api-extractor-model-7.25.0.tgz#8ae54d98a2c238be2dd38eeba0955d67c6c9f7fd"
+  integrity sha512-iGZrBui+7Sde7Rk8vsfnBSIilJ48wiGNxReb4N1ij8OrWCtjSB8fSVkOxL9oR6El7KowrZN51T8SdTzysLAelQ==
   dependencies:
     "@microsoft/tsdoc" "0.14.1"
     "@microsoft/tsdoc-config" "~0.16.1"
     "@rushstack/node-core-library" "3.53.1"
 
-"@microsoft/api-extractor@^7.32.1":
-  version "7.32.1"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.32.1.tgz#b8acacca63e045aa2315ded4774d94db8c579247"
-  integrity sha512-bHijLt3MVIjrk7Uzu1mjvfM6IVt0kwZdBRLrYEnCLBnUqp4dxurV8NeKAovjUV68I70wVz/DMUlEofc4qh1CUA==
+"@microsoft/api-extractor@^7.33.0":
+  version "7.33.0"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.33.0.tgz#31d84afe9afe8592295907450217f54c3e99f3ea"
+  integrity sha512-yf0Kzn1o6fQf/xwwkmOZAXHFbj3q1xvmqvTVltO5lDnESh9Nv5KIaALryxcuf8tbytP2auQmd3C7+Zx5SbmZHg==
   dependencies:
-    "@microsoft/api-extractor-model" "7.24.4"
+    "@microsoft/api-extractor-model" "7.25.0"
     "@microsoft/tsdoc" "0.14.1"
     "@microsoft/tsdoc-config" "~0.16.1"
     "@rushstack/node-core-library" "3.53.1"
