@@ -213,10 +213,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@ikomida/shared-backend@^1.0.7":
-  version "1.0.7"
-  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.7.tgz#a245772622b2b6941e49848aa9dc78314089def5"
-  integrity sha512-Rr6Vko97NkqzxjyRpcgE1IEu4XlhTTSqcaxemk+o8TM3KZPgPnJ7Y2B+ooTsJjDRzrUky/F22jt4e9dC1iieyg==
+"@ikomida/shared-backend@^1.0.9":
+  version "1.0.9"
+  resolved "https://us-central1-npm.pkg.dev/ikomida-dev/node/@ikomida/shared-backend/-/@ikomida/shared-backend-1.0.9.tgz#beefeb35f9742f66d49b1daf8d1f5ff8987690fe"
+  integrity sha512-FCI2TESsmBxAufFED1AcxG6LSJvqwTWYK/OSqIKn5Bf9HVbfb5C2x95uwEx057x5rdYk52jW+CTeeYoOd3OsLg==
   dependencies:
     "@ikomida/shared-logics" "^0.2.3"
     "@ikomida/shared-types" "^1.2.2"
