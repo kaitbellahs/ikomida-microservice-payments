@@ -88,7 +88,7 @@ export default class Payments {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_RESPONSE_ERROR)
       }
       userPaymentModel.status = cancelCharge.status
-      userPaymentModel.save()
+      await userPaymentModel.save()
       return new Utils.Return(true, cancelCharge)
     } catch (exception: any) {
       let error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PRODUCTS_SERVICE_NEW_PRODUCT_EXCEPTION, exception)

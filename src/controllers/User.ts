@@ -200,34 +200,9 @@ export default class User {
         firstDigits: chargeResult?.firstDigits,
         lastDigits: chargeResult?.lastDigits,
         gatewayPaymentID: chargeResult.id,
-        amount: chargeResult.amount
+        amount: chargeResult.amount,
+        contractId: contractModel.id
       })
-      if (userPaymentModel) {
-        await contractModel.$add('userPayment', userPaymentModel)
-      }
-
-      for (const userCreditCardModel of userCreditCardModels ?? []) {
-        await userCreditCardModel?.update({
-          selected: false
-        })
-      }
-      const userCreditCard = await userModel?.$create('userCreditCard', {
-        type: Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE,
-        brand: chargeResult?.brand,
-        firstDigits: chargeResult?.firstDigits,
-        lastDigits: chargeResult?.lastDigits,
-        token: chargeResult?.cardId
-      })
-      if (userPaymentModel) {
-        await userCreditCard?.$add('userPayment', userPaymentModel)
-      }
-      if (userCreditCard) {
-        await contractModel.$add('userCreditCard', userCreditCard)
-      }
-      if (userModel) {
-        userModel.paymentMethodType = Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
-      }
-      await userModel?.save()
       try {
         const paymentPayload = new Types.Classes.CAMQPPayload<string>({
           method: 'cancelPayment',
@@ -243,6 +218,27 @@ export default class User {
         )
         error.log(this.logger)
       }
+
+      for (const userCreditCardModel of userCreditCardModels ?? []) {
+        await userCreditCardModel?.update({
+          selected: false
+        })
+      }
+      const userCreditCard = await userModel?.$create('userCreditCard', {
+        type: Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE,
+        brand: chargeResult?.brand,
+        firstDigits: chargeResult?.firstDigits,
+        lastDigits: chargeResult?.lastDigits,
+        token: chargeResult?.cardId,
+        contractId: contractModel.id
+      })
+      if (userPaymentModel) {
+        await userCreditCard?.$add('userPayment', userPaymentModel)
+      }
+      if (userModel) {
+        userModel.paymentMethodType = Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
+      }
+      await userModel?.save()
       return new Utils.Return(true)
     } catch (exception: any) {
       const error = new Utils.iKomidaError(
