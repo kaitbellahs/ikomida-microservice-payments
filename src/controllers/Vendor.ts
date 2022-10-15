@@ -50,7 +50,7 @@ export default class Vendor {
         return error.logAndReturn(this.logger)
       }
       const couponsLimit = contractModel?.plan?.coupons ?? -1
-      if (couponsLimit !== 0 && (contractModel?.coupons?.length ?? 0) >= couponsLimit) {
+      if (couponsLimit !== -1 && (contractModel?.coupons?.length ?? 0) >= couponsLimit) {
         const error = new Utils.iKomidaError(
           Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_COUPON_LIMIT_EXCEEDED,
           couponsLimit

@@ -179,9 +179,11 @@ export default class WebHooks {
         const userModel = userPaymentModel?.user
         const pNModel = userModel?.pN
         if (pNModel) {
-          let notification = new Utils.Notification(Utils.Notification.VENDOR_ORDER_UPDATED,
+          let notification = new Utils.Notification(
+            Utils.Notification.VENDOR_ORDER_UPDATED,
             order?.customID,
-            order.status?.name)
+            order.status?.name
+          )
           const message = new Types.Classes.CNotificationPayload()
           message.notification = notification
           message.data = new Types.Classes.CNotificationData()
@@ -197,9 +199,11 @@ export default class WebHooks {
           payload.object = payloadObject
           const amqp = new Domain.RabbitMQ(this.logger)
           await amqp?.publish(Domain.RabbitMQ.PUSH_NOTIFICATION_QUEUE, payload)
-          notification = new Utils.Notification(Utils.Notification.USER_ORDER_UPDATED,
+          notification = new Utils.Notification(
+            Utils.Notification.USER_ORDER_UPDATED,
             order?.customID,
-            order.status?.name)
+            order.status?.name
+          )
           message.notification = notification
           payloadObject.userId = userModel?.id
           await amqp?.publish(Domain.RabbitMQ.PUSH_NOTIFICATION_QUEUE, payload)
