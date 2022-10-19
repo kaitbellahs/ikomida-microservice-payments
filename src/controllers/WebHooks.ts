@@ -1,5 +1,4 @@
 import { GateWays, Domain, Utils, BackendTypes, Logics, Types, Helpers, DBModels } from '@ikomida/shared-backend'
-import { v4 as uuidV4 } from 'uuid'
 
 export default class WebHooks {
   logger
@@ -243,41 +242,44 @@ export default class WebHooks {
         this.logger.info('[ASAAS_WEBHOOK] - this is an old model, not suported anymore')
         return true
       }
-      let contractModel: DBModels.ContractModel | null
+      let contractModel: DBModels.ContractModel | null = null
       let tryCount = 0
       let tryN = 0
       do {
         tryCount++
-        contractModel = await DBModels.ContractModel.findOne({
-          where: {
-            ikomidaID: contractDetails?.ikomidaID
-          },
-          include: [
-            {
-              model: DBModels.ContractPaymentSignatureModel,
-              required: false,
-              where: {
-                subscriptionID: paymentObject.subscription
-              },
-              include: [
-                {
-                  model: DBModels.ContractPaymentModel,
-                  where: {
-                    paymentID: paymentObject.id
-                  },
-                  required: false
-                }
-              ]
+        try {
+          contractModel = await DBModels.ContractModel.findOne({
+            where: {
+              ikomidaID: contractDetails?.ikomidaID
             },
-            {
-              model: DBModels.PNModel,
-              required: false,
-              where: {
-                role: BackendTypes.Roles.VENDOR
+            include: [
+              {
+                model: DBModels.ContractPaymentSignatureModel,
+                required: false,
+                where: {
+                  subscriptionID: paymentObject.subscription
+                },
+                include: [
+                  {
+                    model: DBModels.ContractPaymentModel,
+                    where: {
+                      paymentID: paymentObject.id
+                    },
+                    required: false
+                  }
+                ]
+              },
+              {
+                model: DBModels.PNModel,
+                required: false,
+                where: {
+                  role: BackendTypes.Roles.VENDOR
+                }
               }
-            }
-          ]
-        })
+            ]
+          })
+          // eslint-disable-next-line no-empty
+        } catch (_) { }
         if (!contractModel) {
           tryN += tryCount
           await Utils.System.sleep(tryN * 1000)

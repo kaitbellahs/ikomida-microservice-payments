@@ -1,6 +1,12 @@
 import { Types, Domain, Utils, BackendTypes, Helpers, DBModels, slugging, objHasProp } from '@ikomida/shared-backend'
+import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/Utils/iKomidaError'
 
 export default class Payments {
+
+  IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR: IiKomidaErrorModel = {
+    code: 'IMPP0001',
+    message: '{0}'
+  }
   logger
 
   constructor(logger: Utils.Logger) {
@@ -86,6 +92,15 @@ export default class Payments {
       const cancelCharge = await paymentGateway?.cancelCharge(cancelPaymentObject)
       if (!cancelCharge) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_RESPONSE_ERROR)
+      }
+      if (cancelCharge instanceof BackendTypes.TPagseguroCharge) {
+        throw new Utils.iKomidaError(
+          this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
+          cancelCharge.description
+        )
+      }
+      if (!(cancelCharge instanceof Types.Classes.Pagseguro.CChargeResponse)) {
+        throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       userPaymentModel.status = cancelCharge.status
       await userPaymentModel.save()
@@ -191,6 +206,15 @@ export default class Payments {
         )
       const chargeResult = await paymentGateway?.createCharge(chargeObject)
       if (!chargeResult) {
+        throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
+      }
+      if (chargeResult instanceof BackendTypes.TPagseguroCharge) {
+        throw new Utils.iKomidaError(
+          this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
+          chargeResult.description
+        )
+      }
+      if (!(chargeResult instanceof Types.Classes.Pagseguro.CChargeResponse)) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       const userPaymentModel = await userModel.$create('userPayment', {
