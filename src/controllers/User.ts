@@ -9,6 +9,7 @@ import {
   objHasProp,
   slugging
 } from '@ikomida/shared-backend'
+import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/Utils/iKomidaError'
 
 const supportedPaymentMethodTypes = [
   Types.Types.TPaymentMethod.CASH_ON_DELIVERY,
@@ -18,6 +19,10 @@ const supportedPaymentMethodTypes = [
 ]
 
 export default class User {
+  IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR: IiKomidaErrorModel = {
+    code: 'IMPU0001',
+    message: '{0}'
+  }
   logger
   cashUUID = '00000000-0000-0000-0000-000000000000'
 
@@ -136,10 +141,7 @@ export default class User {
     try {
       const payload: Types.Classes.CCreditCardRequest = Types.Classes.CCreditCardRequest.fromObject(input)
       if (!payload.validate() || !this.validatenewCreditCard(payload)) {
-        const error = new Utils.iKomidaError(
-          Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_MISSING_DATA
-        )
-        return error.logAndReturn(this.logger)
+        throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_MISSING_DATA)
       }
       const userPaymentModels = await this.getUserPaymentModels(identity)
       if ('success' in userPaymentModels) {
@@ -150,19 +152,17 @@ export default class User {
       const userCreditCardModels = userPaymentModels.userCreditCardModels
       const vendorSettingsModel = contractModel?.vendorSettings
       if (!vendorSettingsModel) {
-        const error = new Utils.iKomidaError(
+        throw new Utils.iKomidaError(
           Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_INVALID_VENDOR_SETTINGS
         )
-        return error.logAndReturn(this.logger)
       }
       const vendorPaymentGatewayModel = vendorSettingsModel?.vendorPaymentGateway
       const pagseguroHelper = new Helpers.PagseguroHelper(this.logger)
       const paymentGateway = await pagseguroHelper.configure(vendorPaymentGatewayModel)
       if (!paymentGateway) {
-        const error = new Utils.iKomidaError(
+        throw new Utils.iKomidaError(
           Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_INVALID_VENDOR_PAYMENT_SETTINGS
         )
-        return error.logAndReturn(this.logger)
       }
       const createChargeObject = Types.Classes.Pagseguro.CPagSeguroCreateCharge.init(
         identity.ikomidaID ?? '',
@@ -188,10 +188,16 @@ export default class User {
       )
       const chargeResult = await paymentGateway?.createCharge(createChargeObject, true)
       if (!chargeResult) {
-        const error = new Utils.iKomidaError(
-          Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR
+        throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
+      }
+      if (chargeResult instanceof BackendTypes.TPagseguroCharge) {
+        throw new Utils.iKomidaError(
+          this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
+          chargeResult.description
         )
-        return error.logAndReturn(this.logger)
+      }
+      if (!(chargeResult instanceof Types.Classes.Pagseguro.CChargeResponse)) {
+        throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       const userPaymentModel = await userModel?.$create('userPayment', {
         status: chargeResult.status,
@@ -241,10 +247,13 @@ export default class User {
       await userModel?.save()
       return new Utils.Return(true)
     } catch (exception: any) {
-      const error = new Utils.iKomidaError(
+      let error = new Utils.iKomidaError(
         Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION,
         exception
       )
+      if (error instanceof Utils.iKomidaError) {
+        error = exception
+      }
       return error.logAndReturn(this.logger)
     }
   }
