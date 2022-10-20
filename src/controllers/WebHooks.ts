@@ -245,6 +245,7 @@ export default class WebHooks {
       let contractModel: DBModels.ContractModel | null = null
       let tryCount = 0
       let tryN = 0
+      const startTime = new Date().getTime()
       do {
         tryCount++
         try {
@@ -279,17 +280,23 @@ export default class WebHooks {
             ]
           })
           // eslint-disable-next-line no-empty
-        } catch (_) { }
+        } catch (_) {}
         if (!contractModel) {
           tryN += tryCount
-          await Utils.System.sleep(tryN * 1000)
+          await Utils.System.sleep(tryN * 280)
         }
-      } while (tryCount < 4)
+      } while (!contractModel && tryCount <= 4 && new Date().getTime() - startTime + (tryN + tryCount * 280) < 10000)
       if (!contractModel) {
-        const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ASAAS_WEBHOOK_INVALID_CONTRACT)
-        error.log(this.logger)
+        this.logger.error(
+          `❌ Não foi localizado nenhum contrato após ${tryCount} tentativas em ${
+            (new Date().getTime() - startTime) / 1000
+          }s.`
+        )
         return true
       }
+      this.logger.error(
+        `✅ O contrato foi localizado após ${tryCount} tentativas em ${(new Date().getTime() - startTime) / 1000}s.`
+      )
       let contractPaymentSignature = contractModel?.contractPaymentSignature
       const subscriptionResponse = await this.asaasGateway?.getSubscription(paymentObject.subscription)
       if (!subscriptionResponse?.success) {
@@ -308,7 +315,7 @@ export default class WebHooks {
           subscriptionID: subscription?.id,
           status: subscription?.status,
           cycle: subscription?.cycle,
-          value: subscription?.value
+          value: Math.ceil((subscription?.value ?? 0) * 100)
         })
         this.logger.log('[ASAAS_WEBHOOK] - create Contract Payment Signature not found, done')
       }
