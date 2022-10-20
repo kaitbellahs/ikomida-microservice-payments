@@ -2,7 +2,6 @@ import { Types, Domain, Utils, BackendTypes, Helpers, DBModels, slugging, objHas
 import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/Utils/iKomidaError'
 
 export default class Payments {
-
   IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR: IiKomidaErrorModel = {
     code: 'IMPP0001',
     message: '{0}'
