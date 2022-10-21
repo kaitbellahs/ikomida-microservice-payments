@@ -1,13 +1,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: payments-service
+  name: $NAME-service
   labels:
-    app: payments-service
+    app: $NAME-service
   namespace: ikomida
 spec:
   selector:
-     app: payments
+    app: $NAME
   ports:
-  - protocol: TCP
-    port: 1988
+    - protocol: TCP
+      port: 1988
