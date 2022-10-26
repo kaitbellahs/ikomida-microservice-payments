@@ -129,10 +129,10 @@ export default class Vendor {
       const where =
         timestamp && timestamp != 0 && Number(Logics.Finances.toNumber(timestamp)) == timestamp
           ? {
-              createdAt: {
-                [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
-              }
+            createdAt: {
+              [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
             }
+          }
           : null
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -227,6 +227,8 @@ export default class Vendor {
 
   async getSubscription(identity: Types.Classes.CUser) {
     try {
+      const dueDate = Logics.DateTime?.parseAsaasDate(Logics.DateTime?.localToday())
+      dueDate.setDate(dueDate.getDate() + 30)
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
           ikomidaID: identity.ikomidaID
@@ -256,7 +258,7 @@ export default class Vendor {
                 order: [['dueDate', 'DESC']],
                 where: {
                   dueDate: {
-                    [Domain.SqlDB.Op.lte]: Logics.DateTime?.parseAsaasDate(Logics.DateTime?.localToday())
+                    [Domain.SqlDB.Op.lte]: dueDate
                   }
                 }
               }
@@ -285,12 +287,6 @@ export default class Vendor {
         return error.logAndReturn(this.logger)
       }
       const chargeModels = contractPaymentSignature?.contractPayments
-      if (!chargeModels || chargeModels.length === 0) {
-        const error = new Utils.iKomidaError(
-          Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_INVALID_PAYMENTS
-        )
-        return error.logAndReturn(this.logger)
-      }
       const charges = chargeModels?.map(charge => {
         return Types.Classes.CSubscriptionCharge.init(
           charge?.value ?? 0,
@@ -302,7 +298,7 @@ export default class Vendor {
           charge?.transactionReceiptUrl ?? undefined,
           charge?.confirmedDate ?? undefined
         )
-      })
+      }) ?? []
       const subscriptionObject = Types.Classes.CSubscription.init(
         planModel?.name ?? '-',
         contractPaymentSignature?.value ?? 0,
