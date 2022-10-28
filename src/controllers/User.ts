@@ -9,7 +9,7 @@ import {
   objHasProp,
   slugging
 } from '@ikomida/shared-backend'
-import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/Utils/iKomidaError'
+import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/src/Utils/iKomidaError'
 
 const supportedPaymentMethodTypes = [
   Types.Types.TPaymentMethod.CASH_ON_DELIVERY,
