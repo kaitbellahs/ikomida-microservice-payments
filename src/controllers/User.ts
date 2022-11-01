@@ -66,7 +66,6 @@ export default class User {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_INVALID_CONTRACT)
         return error.logAndReturn(this.logger)
       }
-      this.logger.info(contractModel)
       const couponModels = contractModel.coupons
       if ((couponModels?.length ?? 0) !== 1) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_NOT_FOUND)
@@ -75,6 +74,7 @@ export default class User {
       const coupon = Types.Classes.CCoupon.init(
         couponModels?.[0]?.name ?? '',
         couponModels?.[0]?.value ?? 0,
+        couponModels?.[0]?.minValue ?? 0,
         couponModels?.[0]?.valueType ?? Types.Types.TDiscount.NO,
         undefined,
         undefined,
