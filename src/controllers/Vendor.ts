@@ -63,6 +63,7 @@ export default class Vendor {
         value: Logics.Finances.toFinanceNumber(coupon.value),
         minValue: Logics.Finances.toFinanceNumber(coupon.minValue),
         valueType: coupon.valueType,
+        orderTypes: coupon.orderTypes,
         quantity: coupon.quantity ? coupon.quantity : 0
       })
       return new Utils.Return(true)
@@ -130,10 +131,10 @@ export default class Vendor {
       const where =
         timestamp && timestamp != 0 && Number(Logics.Finances.toNumber(timestamp)) == timestamp
           ? {
-              createdAt: {
-                [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
-              }
+            createdAt: {
+              [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
             }
+          }
           : null
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -176,6 +177,7 @@ export default class Vendor {
           couponModel.valueType ?? Types.Types.TDiscount.NO,
           couponModel.quantity,
           couponModel.validity,
+          couponModel.orderTypes,
           couponModel?.createdAt,
           couponModel.id,
           couponModel?.createdAt.getTime()

@@ -64,7 +64,7 @@ app.post('/coupon', async (req, res) => {
       payload = await vendor.newCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.body)
       break
     case BackendTypes.Roles.CLIENT:
-      payload = await user.addCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.body?.coupon)
+      payload = await user.addCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.body)
       break
   }
   res.status(payload?.success ? 201 : 403).sendResponse(payload)
