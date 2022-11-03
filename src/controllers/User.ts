@@ -72,7 +72,10 @@ export default class User {
         return error.logAndReturn(this.logger)
       }
       const couponModels = contractModel.coupons
-      if ((couponModels?.length ?? 0) !== 1 || (payload.orderTypes && !couponModels?.[0].orderTypes?.includes(payload.orderTypes[0]))) {
+      if (
+        (couponModels?.length ?? 0) !== 1 ||
+        (payload.orderTypes && !couponModels?.[0].orderTypes?.includes(payload.orderTypes[0]))
+      ) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_NOT_FOUND)
         return error.logAndReturn(this.logger)
       }
