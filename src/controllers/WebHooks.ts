@@ -434,7 +434,7 @@ export default class WebHooks {
     vendorPaymentGateway: DBModels.VendorPaymentGatewayModel | undefined
   ) {
     const paymentStatus = paymentObject.status
-    if (paymentStatus && [Types.Types.TOrderStatus.CANCELED].includes(paymentStatus)) {
+    if (paymentStatus && [Types.Types.TPagSeguroPaymentStatus.CANCELED].includes(paymentStatus)) {
       return true
     }
     const pagseguroHelper = new Helpers.PagseguroHelper(this.logger)
