@@ -61,7 +61,9 @@ export default class Vendor {
         name: coupon.name,
         validity: coupon.validity,
         value: Logics.Finances.toFinanceNumber(coupon.value),
+        minValue: Logics.Finances.toFinanceNumber(coupon.minValue),
         valueType: coupon.valueType,
+        orderTypes: coupon.orderTypes,
         quantity: coupon.quantity ? coupon.quantity : 0
       })
       return new Utils.Return(true)
@@ -171,9 +173,11 @@ export default class Vendor {
         return Types.Classes.CCoupon.init(
           couponModel.name ?? '-',
           couponModel.value ?? 0,
+          couponModel.minValue ?? 0,
           couponModel.valueType ?? Types.Types.TDiscount.NO,
           couponModel.quantity,
           couponModel.validity,
+          couponModel.orderTypes,
           couponModel?.createdAt,
           couponModel.id,
           couponModel?.createdAt.getTime()

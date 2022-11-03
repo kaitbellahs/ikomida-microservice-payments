@@ -23,6 +23,10 @@ export default class User {
     code: 'IMPU0001',
     message: '{0}'
   }
+  IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_ADD_COUPOM_MIN_VALUE: IiKomidaErrorModel = {
+    code: 'IMPU0002',
+    message: 'Este cupom é válido somente para compras acima de R$ {0}'
+  }
   logger
   cashUUID = '00000000-0000-0000-0000-000000000000'
 
@@ -30,8 +34,9 @@ export default class User {
     this.logger = logger
   }
 
-  async addCoupon(identity: Types.Classes.CUser, name: string) {
+  async addCoupon(identity: Types.Classes.CUser, input: any) {
     try {
+      const payload: Types.Classes.CCoupon = Types.Classes.CCoupon.fromObject(input)
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
           ikomidaID: identity.ikomidaID
@@ -51,7 +56,7 @@ export default class User {
             model: DBModels.CouponModel,
             required: false,
             where: {
-              name,
+              name: payload.name,
               quantity: {
                 [Domain.SqlDB.Op.gt]: 0
               },
@@ -66,16 +71,28 @@ export default class User {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_INVALID_CONTRACT)
         return error.logAndReturn(this.logger)
       }
-      this.logger.info(contractModel)
       const couponModels = contractModel.coupons
-      if ((couponModels?.length ?? 0) !== 1) {
+      if (
+        (couponModels?.length ?? 0) !== 1 ||
+        (payload.orderTypes && !couponModels?.[0].orderTypes?.includes(payload.orderTypes[0]))
+      ) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_NOT_FOUND)
+        return error.logAndReturn(this.logger)
+      }
+      const couponModel = couponModels?.[0]
+      if (couponModel && couponModel.minValue && couponModel.minValue > payload.minValue) {
+        const error = new Utils.iKomidaError(
+          this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_ADD_COUPOM_MIN_VALUE,
+          couponModel.minValue / 100
+        )
         return error.logAndReturn(this.logger)
       }
       const coupon = Types.Classes.CCoupon.init(
         couponModels?.[0]?.name ?? '',
         couponModels?.[0]?.value ?? 0,
+        couponModels?.[0]?.minValue ?? 0,
         couponModels?.[0]?.valueType ?? Types.Types.TDiscount.NO,
+        undefined,
         undefined,
         undefined,
         undefined,
