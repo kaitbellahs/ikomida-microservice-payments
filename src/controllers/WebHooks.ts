@@ -280,7 +280,7 @@ export default class WebHooks {
             ]
           })
           // eslint-disable-next-line no-empty
-        } catch (_) { }
+        } catch (_) {}
         if (!contractModel) {
           tryN += tryCount
           await Utils.System.sleep(tryN * 250)
@@ -288,7 +288,8 @@ export default class WebHooks {
       } while (!contractModel && tryCount <= 4 && new Date().getTime() - startTime + (tryN + tryCount * 280) < 10000)
       if (!contractModel) {
         this.logger.error(
-          `❌ Não foi localizado nenhum contrato após ${tryCount} tentativas em ${(new Date().getTime() - startTime) / 1000
+          `❌ Não foi localizado nenhum contrato após ${tryCount} tentativas em ${
+            (new Date().getTime() - startTime) / 1000
           }s.`
         )
         return true
@@ -433,7 +434,7 @@ export default class WebHooks {
     vendorPaymentGateway: DBModels.VendorPaymentGatewayModel | undefined
   ) {
     const paymentStatus = paymentObject.status
-    if (paymentStatus && [Types.Types.TOrderStatus.CANCELED].includes(paymentStatus)) {
+    if (paymentStatus && [Types.Types.TPagSeguroPaymentStatus.CANCELED].includes(paymentStatus)) {
       return true
     }
     const pagseguroHelper = new Helpers.PagseguroHelper(this.logger)
