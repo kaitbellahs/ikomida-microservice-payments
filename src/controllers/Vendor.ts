@@ -61,7 +61,9 @@ export default class Vendor {
         name: coupon.name,
         validity: coupon.validity,
         value: Logics.Finances.toFinanceNumber(coupon.value),
+        minValue: Logics.Finances.toFinanceNumber(coupon.minValue),
         valueType: coupon.valueType,
+        orderTypes: coupon.orderTypes,
         quantity: coupon.quantity ? coupon.quantity : 0
       })
       return new Utils.Return(true)
@@ -129,10 +131,10 @@ export default class Vendor {
       const where =
         timestamp && timestamp != 0 && Number(Logics.Finances.toNumber(timestamp)) == timestamp
           ? {
-            createdAt: {
-              [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
+              createdAt: {
+                [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
+              }
             }
-          }
           : null
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -171,9 +173,11 @@ export default class Vendor {
         return Types.Classes.CCoupon.init(
           couponModel.name ?? '-',
           couponModel.value ?? 0,
+          couponModel.minValue ?? 0,
           couponModel.valueType ?? Types.Types.TDiscount.NO,
           couponModel.quantity,
           couponModel.validity,
+          couponModel.orderTypes,
           couponModel?.createdAt,
           couponModel.id,
           couponModel?.createdAt.getTime()
@@ -287,18 +291,19 @@ export default class Vendor {
         return error.logAndReturn(this.logger)
       }
       const chargeModels = contractPaymentSignature?.contractPayments
-      const charges = chargeModels?.map(charge => {
-        return Types.Classes.CSubscriptionCharge.init(
-          charge?.value ?? 0,
-          charge?.creditCardNumber ?? 0,
-          charge?.creditCardBrand ?? '-',
-          charge?.dueDate ?? new Date(),
-          charge?.status ?? Types.Types.TAsaasPaymentStatus.PENDING,
-          charge?.invoiceUrl ?? undefined,
-          charge?.transactionReceiptUrl ?? undefined,
-          charge?.confirmedDate ?? undefined
-        )
-      }) ?? []
+      const charges =
+        chargeModels?.map(charge => {
+          return Types.Classes.CSubscriptionCharge.init(
+            charge?.value ?? 0,
+            charge?.creditCardNumber ?? 0,
+            charge?.creditCardBrand ?? '-',
+            charge?.dueDate ?? new Date(),
+            charge?.status ?? Types.Types.TAsaasPaymentStatus.PENDING,
+            charge?.invoiceUrl ?? undefined,
+            charge?.transactionReceiptUrl ?? undefined,
+            charge?.confirmedDate ?? undefined
+          )
+        }) ?? []
       const subscriptionObject = Types.Classes.CSubscription.init(
         planModel?.name ?? '-',
         contractPaymentSignature?.value ?? 0,
