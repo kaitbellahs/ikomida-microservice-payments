@@ -11,7 +11,7 @@ export default class Vendor {
   async newCoupon(identity: Types.Classes.CUser, input: any) {
     try {
       const coupon: Types.Classes.CCoupon = Types.Classes.CCoupon.fromObject(input)
-      const role = BackendTypes.Roles.valueOf(identity.role)
+      const role = identity.role
       if (!coupon.validate() || !role || ![BackendTypes.Roles.VENDOR, BackendTypes.Roles.STAFF].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
@@ -75,7 +75,7 @@ export default class Vendor {
 
   async removeCoupon(identity: Types.Classes.CUser, id?: string) {
     try {
-      const role = BackendTypes.Roles.valueOf(identity.role)
+      const role = identity.role
       if (!role || ![BackendTypes.Roles.VENDOR, BackendTypes.Roles.ADMIN].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_REMOVE_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
@@ -123,7 +123,7 @@ export default class Vendor {
 
   async getCoupons(identity: Types.Classes.CUser, timestamp = 0) {
     try {
-      const role = BackendTypes.Roles.valueOf(identity.role)
+      const role = identity.role
       if (role !== BackendTypes.Roles.VENDOR) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_GET_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
@@ -131,10 +131,10 @@ export default class Vendor {
       const where =
         timestamp && timestamp != 0 && Number(Logics.Finances.toNumber(timestamp)) == timestamp
           ? {
-              createdAt: {
-                [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
-              }
+            createdAt: {
+              [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
             }
+          }
           : null
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -194,7 +194,7 @@ export default class Vendor {
   }
 
   async getCouponsCount(identity: Types.Classes.CUser) {
-    const role = BackendTypes.Roles.valueOf(identity.role)
+    const role = identity.role
     if (role !== BackendTypes.Roles.VENDOR) {
       return new Utils.Return(false, 0)
     }
