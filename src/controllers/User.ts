@@ -48,7 +48,7 @@ export default class User {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [BackendTypes.Roles.CLIENT]
+                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.CLIENT]
               }
             }
           },
@@ -207,7 +207,7 @@ export default class User {
       if (!chargeResult) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      if (chargeResult instanceof BackendTypes.TPagseguroCharge) {
+      if (chargeResult instanceof Types.Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           chargeResult.description
@@ -387,7 +387,7 @@ export default class User {
           where: {
             id: identity.id,
             role: {
-              [Domain.SqlDB.Op.in]: [BackendTypes.Roles.CLIENT]
+              [Domain.SqlDB.Op.in]: [Types.Types.TRoles.CLIENT]
             }
           },
           include: [

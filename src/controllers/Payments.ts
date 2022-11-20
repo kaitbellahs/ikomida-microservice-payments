@@ -28,10 +28,10 @@ export default class Payments {
               id: identity.id,
               role: {
                 [Domain.SqlDB.Op.in]: [
-                  BackendTypes.Roles.ADMIN,
-                  BackendTypes.Roles.CLIENT,
-                  BackendTypes.Roles.VENDOR,
-                  BackendTypes.Roles.STAFF
+                  Types.Types.TRoles.ADMIN,
+                  Types.Types.TRoles.CLIENT,
+                  Types.Types.TRoles.VENDOR,
+                  Types.Types.TRoles.STAFF
                 ]
               }
             }
@@ -92,7 +92,7 @@ export default class Payments {
       if (!cancelCharge) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_RESPONSE_ERROR)
       }
-      if (cancelCharge instanceof BackendTypes.TPagseguroCharge) {
+      if (cancelCharge instanceof Types.Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           cancelCharge.description
@@ -128,10 +128,10 @@ export default class Payments {
               id: identity.id,
               role: {
                 [Domain.SqlDB.Op.in]: [
-                  BackendTypes.Roles.ADMIN,
-                  BackendTypes.Roles.CLIENT,
-                  BackendTypes.Roles.VENDOR,
-                  BackendTypes.Roles.STAFF
+                  Types.Types.TRoles.ADMIN,
+                  Types.Types.TRoles.CLIENT,
+                  Types.Types.TRoles.VENDOR,
+                  Types.Types.TRoles.STAFF
                 ]
               }
             },
@@ -207,7 +207,7 @@ export default class Payments {
       if (!chargeResult) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      if (chargeResult instanceof BackendTypes.TPagseguroCharge) {
+      if (chargeResult instanceof Types.Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           chargeResult.description
