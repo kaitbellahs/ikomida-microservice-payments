@@ -1,6 +1,6 @@
 {
   "name": "ikomida-payments-service",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "ikomida payments service",
   "private": true,
   "module": "build/service.js",

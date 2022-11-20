@@ -124,6 +124,7 @@ export default class Vendor {
   async getCoupons(identity: Types.Classes.CUser, timestamp = 0) {
     try {
       const role = identity.role
+      console.log('role:', Types.Types.TRoles.isVendor(role), role)
       if (!Types.Types.TRoles.isVendor(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_GET_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
