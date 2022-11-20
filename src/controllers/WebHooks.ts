@@ -25,7 +25,7 @@ export default class WebHooks {
           {
             model: DBModels.PNModel,
             where: {
-              role: BackendTypes.Roles.VENDOR
+              role: Types.Types.TRoles.VENDOR
             },
             required: false
           },
@@ -274,7 +274,7 @@ export default class WebHooks {
                 model: DBModels.PNModel,
                 required: false,
                 where: {
-                  role: BackendTypes.Roles.VENDOR
+                  role: Types.Types.TRoles.VENDOR
                 }
               }
             ]

@@ -31,7 +31,7 @@ app.post('/cancelPayment', async (req, res) => {
   res.sendResponse(payload)
 })
 
-app.get('/payments', async (req, res, next) => {
+app.get('/payments', async (req, res) => {
   const payload = await user.getPaymentMethods(Types.Classes.CUser.fromObject(req.headers?.identity))
   res.status(200).sendResponse(payload)
 })
@@ -58,12 +58,12 @@ app.post('/processPayment', async (req, res) => {
 
 app.post('/coupon', async (req, res) => {
   let payload
-  switch (BackendTypes.Roles.valueOf(Types.Classes.CUser.fromObject(req.headers?.identity)?.role)) {
-    case BackendTypes.Roles.VENDOR:
-    case BackendTypes.Roles.STAFF:
+  switch (Types.Classes.CUser.fromObject(req.headers?.identity)?.role) {
+    case Types.Types.TRoles.VENDOR:
+    case Types.Types.TRoles.STAFF:
       payload = await vendor.newCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.body)
       break
-    case BackendTypes.Roles.CLIENT:
+    case Types.Types.TRoles.CLIENT:
       payload = await user.addCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.body)
       break
   }
@@ -72,9 +72,7 @@ app.post('/coupon', async (req, res) => {
 
 app.delete('/coupon/:id', async (req, res) => {
   let payload
-  if (
-    BackendTypes.Roles.valueOf(Types.Classes.CUser.fromObject(req.headers?.identity).role) === BackendTypes.Roles.VENDOR
-  ) {
+  if (Types.Classes.CUser.fromObject(req.headers?.identity)?.role === Types.Types.TRoles.VENDOR) {
     payload = await vendor.removeCoupon(Types.Classes.CUser.fromObject(req.headers?.identity), req.params.id)
   }
   res.status(payload?.success ? 201 : 200).sendResponse(payload)
