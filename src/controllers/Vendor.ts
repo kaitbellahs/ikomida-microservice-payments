@@ -1,4 +1,4 @@
-import { Domain, Utils, BackendTypes, Logics, Types, DBModels } from '@ikomida/shared-backend'
+import { Domain, Utils, Logics, Types, DBModels } from '@ikomida/shared-backend'
 
 export default class Vendor {
   logger
@@ -12,7 +12,7 @@ export default class Vendor {
     try {
       const coupon: Types.Classes.CCoupon = Types.Classes.CCoupon.fromObject(input)
       const role = identity.role
-      if (!coupon.validate() || !role || ![BackendTypes.Roles.VENDOR, BackendTypes.Roles.STAFF].includes(role)) {
+      if (!coupon.validate() || !role || ![Types.Types.TRoles.VENDOR, Types.Types.TRoles.STAFF].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
@@ -27,7 +27,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [BackendTypes.Roles.ADMIN, BackendTypes.Roles.VENDOR, BackendTypes.Roles.STAFF]
+                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR, Types.Types.TRoles.STAFF]
               }
             }
           },
@@ -76,7 +76,7 @@ export default class Vendor {
   async removeCoupon(identity: Types.Classes.CUser, id?: string) {
     try {
       const role = identity.role
-      if (!role || ![BackendTypes.Roles.VENDOR, BackendTypes.Roles.ADMIN].includes(role)) {
+      if (!role || ![Types.Types.TRoles.VENDOR, Types.Types.TRoles.ADMIN].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_REMOVE_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
@@ -91,7 +91,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [BackendTypes.Roles.ADMIN, BackendTypes.Roles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
               }
             }
           },
@@ -124,7 +124,7 @@ export default class Vendor {
   async getCoupons(identity: Types.Classes.CUser, timestamp = 0) {
     try {
       const role = identity.role
-      if (role !== BackendTypes.Roles.VENDOR) {
+      if (!Types.Types.TRoles.isVendor(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_GET_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
@@ -147,7 +147,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [BackendTypes.Roles.ADMIN, BackendTypes.Roles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
               }
             }
           },
@@ -195,7 +195,7 @@ export default class Vendor {
 
   async getCouponsCount(identity: Types.Classes.CUser) {
     const role = identity.role
-    if (role !== BackendTypes.Roles.VENDOR) {
+    if (!Types.Types.TRoles.isVendor(role)) {
       return new Utils.Return(false, 0)
     }
     const contractModel = await DBModels.ContractModel.findOne({
@@ -209,7 +209,7 @@ export default class Vendor {
           where: {
             id: identity.id,
             role: {
-              [Domain.SqlDB.Op.in]: [BackendTypes.Roles.ADMIN, BackendTypes.Roles.VENDOR]
+              [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
             }
           }
         },
@@ -244,7 +244,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [BackendTypes.Roles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.VENDOR]
               }
             }
           },
