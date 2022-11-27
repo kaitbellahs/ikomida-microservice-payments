@@ -271,6 +271,10 @@ export default class WebHooks {
                 ]
               },
               {
+                model: DBModels.PlanModel,
+                required: false
+              },
+              {
                 model: DBModels.PNModel,
                 required: false,
                 where: {
@@ -375,7 +379,7 @@ export default class WebHooks {
           clientPaymentDate: Logics.DateTime?.parseAsaasDate(paymentObject.clientPaymentDate),
           value: Math.ceil(paymentObject.value * 100),
           netValue: Math.ceil(paymentObject.netValue * 100),
-          plan: contractDetails?.plan,
+          plan: contractModel.plan?.name,
           billingType: paymentObject.billingType,
           creditCardNumber: paymentObject.creditCard?.creditCardNumber,
           creditCardBrand: paymentObject.creditCard?.creditCardBrand,
