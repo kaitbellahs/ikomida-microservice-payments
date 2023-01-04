@@ -1,4 +1,6 @@
-import { GateWays, Domain, Utils, BackendTypes, Logics, Types, Helpers, DBModels } from '@ikomida/shared-backend'
+import { GateWays, Domain, Utils, Helpers, DBModels } from '@ikomida/shared-backend'
+import { DateTime } from '@ikomida/shared-logics'
+import { Classes, Types } from '@ikomida/shared-types'
 
 export default class WebHooks {
   logger
@@ -13,8 +15,8 @@ export default class WebHooks {
 
   async pagseguro(contractID: string, input: any, authenticityToken?: string) {
     try {
-      const payload: Types.Classes.Pagseguro.CPagSeguroChargeResponse =
-        Types.Classes.Pagseguro.CPagSeguroChargeResponse.fromObject(input)
+      const payload: Classes.Pagseguro.CPagSeguroChargeResponse =
+        Classes.Pagseguro.CPagSeguroChargeResponse.fromObject(input)
       this.logger.log('--pagSegroWebHook:', contractID, payload.toJSON(), authenticityToken)
 
       const contractModel = await DBModels.ContractModel.findOne({
@@ -25,7 +27,7 @@ export default class WebHooks {
           {
             model: DBModels.PNModel,
             where: {
-              role: Types.Types.TRoles.VENDOR
+              role: Types.TRoles.VENDOR
             },
             required: false
           },
@@ -104,44 +106,44 @@ export default class WebHooks {
       }
       if (
         order?.status &&
-        [Types.Types.TOrderStatus.WAITING_PAYMENT, Types.Types.TOrderStatus.OPEN].includes(order?.status) &&
+        [Types.TOrderStatus.WAITING_PAYMENT, Types.TOrderStatus.OPEN].includes(order?.status) &&
         (!paymentStatus ||
           ![
-            Types.Types.TPagSeguroPaymentStatus.AUTHORIZED,
-            Types.Types.TPagSeguroPaymentStatus.INANALYSE,
-            Types.Types.TPagSeguroPaymentStatus.PAID
+            Types.TPagSeguroPaymentStatus.AUTHORIZED,
+            Types.TPagSeguroPaymentStatus.INANALYSE,
+            Types.TPagSeguroPaymentStatus.PAID
           ].includes(paymentStatus))
       ) {
         sendPN = true
-        order.status = Types.Types.TOrderStatus.CANCELED
+        order.status = Types.TOrderStatus.CANCELED
         await this.cancelPayment(paymentObject, contractModel?.vendorSettings?.vendorPaymentGateway)
       }
       if (
         order?.status &&
-        [Types.Types.TOrderStatus.OPEN].includes(order?.status) &&
+        [Types.TOrderStatus.OPEN].includes(order?.status) &&
         paymentStatus &&
-        [Types.Types.TPagSeguroPaymentStatus.AUTHORIZED].includes(paymentStatus)
+        [Types.TPagSeguroPaymentStatus.AUTHORIZED].includes(paymentStatus)
       ) {
         sendPN = true
-        order.status = Types.Types.TOrderStatus.WAITING_PAYMENT
+        order.status = Types.TOrderStatus.WAITING_PAYMENT
       }
       if (
         order?.status &&
-        [Types.Types.TOrderStatus.CANCELED].includes(order?.status) &&
+        [Types.TOrderStatus.CANCELED].includes(order?.status) &&
         paymentStatus &&
-        [Types.Types.TPagSeguroPaymentStatus.PAID].includes(paymentStatus)
+        [Types.TPagSeguroPaymentStatus.PAID].includes(paymentStatus)
       ) {
         sendPN = true
         await this.cancelPayment(paymentObject, contractModel?.vendorSettings?.vendorPaymentGateway)
       }
       if (
         order?.status &&
-        [Types.Types.TOrderStatus.WAITING_PAYMENT].includes(order?.status) &&
+        [Types.TOrderStatus.WAITING_PAYMENT].includes(order?.status) &&
         paymentStatus &&
-        [Types.Types.TPagSeguroPaymentStatus.PAID].includes(paymentStatus)
+        [Types.TPagSeguroPaymentStatus.PAID].includes(paymentStatus)
       ) {
         sendPN = true
-        order.status = Types.Types.TOrderStatus.OPEN
+        order.status = Types.TOrderStatus.OPEN
       }
       await order.save()
       if (!sendPN) {
@@ -154,21 +156,21 @@ export default class WebHooks {
             Utils.Notification.ORDER_STATUS,
             paymentStatus ? paymentStatus?.id : ''
           )
-          const message = new Types.Classes.CNotificationPayload()
+          const message = new Classes.CNotificationPayload()
           message.notification = notification
-          message.data = new Types.Classes.CNotificationData()
+          message.data = new Classes.CNotificationData()
           message.data.method = notification.method
           message.data.uri = notification.uri
           message.data.logon = notification.logon
           message.data.payload = order?.id
-          const payload = new Types.Classes.CAMQPPayload<Types.Classes.CAMQPPayloadObject>()
+          const payload = new Classes.CAMQPPayload<Classes.CAMQPPayloadObject>()
           payload.method = 'send'
-          const payloadObject = new Types.Classes.CAMQPPayloadObject()
+          const payloadObject = new Classes.CAMQPPayloadObject()
           payloadObject.message = message
           payloadObject.contractId = contractModel?.id
           payload.object = payloadObject
           const amqp = new Domain.RabbitMQ(this.logger)
-          await amqp?.publish<Types.Classes.CAMQPPayloadObject>(Domain.RabbitMQ.PUSH_NOTIFICATION_QUEUE, payload)
+          await amqp?.publish<Classes.CAMQPPayloadObject>(Domain.RabbitMQ.PUSH_NOTIFICATION_QUEUE, payload)
           await amqp?.close()
         } else {
           this.logger.warn(
@@ -183,16 +185,16 @@ export default class WebHooks {
             order?.customID,
             order.status?.name
           )
-          const message = new Types.Classes.CNotificationPayload()
+          const message = new Classes.CNotificationPayload()
           message.notification = notification
-          message.data = new Types.Classes.CNotificationData()
+          message.data = new Classes.CNotificationData()
           message.data.method = notification.method
           message.data.uri = notification.uri
           message.data.logon = notification.logon
           message.data.payload = order?.id
-          const payload = new Types.Classes.CAMQPPayload<Types.Classes.CAMQPPayloadObject>()
+          const payload = new Classes.CAMQPPayload<Classes.CAMQPPayloadObject>()
           payload.method = 'send'
-          const payloadObject = new Types.Classes.CAMQPPayloadObject()
+          const payloadObject = new Classes.CAMQPPayloadObject()
           payloadObject.message = message
           payloadObject.contractId = contractModel?.id
           payload.object = payloadObject
@@ -278,7 +280,7 @@ export default class WebHooks {
                 model: DBModels.PNModel,
                 required: false,
                 where: {
-                  role: Types.Types.TRoles.VENDOR
+                  role: Types.TRoles.VENDOR
                 }
               }
             ]
@@ -326,13 +328,12 @@ export default class WebHooks {
       let lastDueDate = contractPaymentSignature?.lastDueDate
       let nextDueDate = contractPaymentSignature?.nextDueDate
 
-      const dueDate = Logics.DateTime?.parseAsaasDate(paymentObject.dueDate)
-      const todayDate = Logics.DateTime?.parseAsaasDate(Logics.DateTime?.localToday())
-      const acceptedPaymentStatus = [
-        Types.Types.TAsaasPaymentStatus.PENDING,
-        Types.Types.TAsaasPaymentStatus.CONFIRMED
-      ].includes(paymentObject.status)
-      const pendingStatus = [Types.Types.TAsaasPaymentStatus.PENDING].includes(paymentObject.status)
+      const dueDate = DateTime?.parseAsaasDate(paymentObject.dueDate)
+      const todayDate = DateTime?.parseAsaasDate(DateTime?.localToday())
+      const acceptedPaymentStatus = [Types.TAsaasPaymentStatus.PENDING, Types.TAsaasPaymentStatus.CONFIRMED].includes(
+        paymentObject.status
+      )
+      const pendingStatus = [Types.TAsaasPaymentStatus.PENDING].includes(paymentObject.status)
 
       if (acceptedPaymentStatus && dueDate <= todayDate && (!lastDueDate || dueDate > lastDueDate)) {
         lastDueDate = dueDate
@@ -341,7 +342,7 @@ export default class WebHooks {
         nextDueDate = dueDate
       }
       contractPaymentSignature.status = subscription?.deleted
-        ? Types.Types.TAsaasSignatureStatus.CANCELED
+        ? Types.TAsaasSignatureStatus.CANCELED
         : subscription?.status ?? undefined
       contractPaymentSignature.lastDueDate = lastDueDate
       contractPaymentSignature.nextDueDate = nextDueDate
@@ -353,10 +354,10 @@ export default class WebHooks {
       const paymentStatus = paymentObject.status
       let contractPaymentModel = contractPaymentModels?.[0]
       if ((contractPaymentModels?.length ?? 0) === 1 && contractPaymentModel) {
-        contractPaymentModel.status = paymentObject.deleted ? Types.Types.TAsaasPaymentStatus.CANCELED : paymentStatus
-        contractPaymentModel.dueDate = Logics.DateTime?.parseAsaasDate(paymentObject.dueDate)
-        contractPaymentModel.confirmedDate = Logics.DateTime?.parseAsaasDate(paymentObject.confirmedDate)
-        contractPaymentModel.clientPaymentDate = Logics.DateTime?.parseAsaasDate(paymentObject.clientPaymentDate)
+        contractPaymentModel.status = paymentObject.deleted ? Types.TAsaasPaymentStatus.CANCELED : paymentStatus
+        contractPaymentModel.dueDate = DateTime?.parseAsaasDate(paymentObject.dueDate)
+        contractPaymentModel.confirmedDate = DateTime?.parseAsaasDate(paymentObject.confirmedDate)
+        contractPaymentModel.clientPaymentDate = DateTime?.parseAsaasDate(paymentObject.clientPaymentDate)
         contractPaymentModel.value = Math.ceil(paymentObject.value * 100)
         contractPaymentModel.netValue = Math.ceil(paymentObject.netValue * 100)
         contractPaymentModel.creditCardNumber = paymentObject.creditCard?.creditCardNumber
@@ -367,16 +368,16 @@ export default class WebHooks {
         contractPaymentModel.transactionReceiptUrl = paymentObject.transactionReceiptUrl
         await contractPaymentModel.save()
       } else {
-        const date = Logics.DateTime?.parseAsaasDate(paymentObject.dueDate)
+        const date = DateTime?.parseAsaasDate(paymentObject.dueDate)
         contractPaymentModel = await contractModel.$create('contractPayment', {
           gateway: 'Asaas',
           subscriptionID: paymentObject.subscription,
           paymentID: paymentObject.id,
           status: paymentObject.status,
           month: date?.getMonth() + 1,
-          dueDate: Logics.DateTime?.parseAsaasDate(paymentObject.dueDate),
-          confirmedDate: Logics.DateTime?.parseAsaasDate(paymentObject.confirmedDate),
-          clientPaymentDate: Logics.DateTime?.parseAsaasDate(paymentObject.clientPaymentDate),
+          dueDate: DateTime?.parseAsaasDate(paymentObject.dueDate),
+          confirmedDate: DateTime?.parseAsaasDate(paymentObject.confirmedDate),
+          clientPaymentDate: DateTime?.parseAsaasDate(paymentObject.clientPaymentDate),
           value: Math.ceil(paymentObject.value * 100),
           netValue: Math.ceil(paymentObject.netValue * 100),
           plan: contractModel.plan?.name,
@@ -394,16 +395,16 @@ export default class WebHooks {
         const pNModels = contractModel?.pNs
         if ((pNModels?.length ?? 0) === 1) {
           const notification = new Utils.Notification(Utils.Notification.NEW_CHARGE)
-          const message = new Types.Classes.CNotificationPayload()
+          const message = new Classes.CNotificationPayload()
           message.notification = notification
-          message.data = new Types.Classes.CNotificationData()
+          message.data = new Classes.CNotificationData()
           message.data.method = notification.method
           message.data.uri = notification.uri
           message.data.logon = notification.logon
           message.data.payload = contractPaymentModel?.id
-          const payload = new Types.Classes.CAMQPPayload<Types.Classes.CAMQPPayloadObject>()
+          const payload = new Classes.CAMQPPayload<Classes.CAMQPPayloadObject>()
           payload.method = 'send'
-          const payloadObject = new Types.Classes.CAMQPPayloadObject()
+          const payloadObject = new Classes.CAMQPPayloadObject()
           payloadObject.message = message
           payloadObject.contractId = contractModel?.id
           payload.object = payloadObject
@@ -434,11 +435,11 @@ export default class WebHooks {
   }
 
   async cancelPayment(
-    paymentObject: Types.Classes.Pagseguro.CPagSeguroChargeResponse,
+    paymentObject: Classes.Pagseguro.CPagSeguroChargeResponse,
     vendorPaymentGateway: DBModels.VendorPaymentGatewayModel | undefined
   ) {
     const paymentStatus = paymentObject.status
-    if (paymentStatus && [Types.Types.TPagSeguroPaymentStatus.CANCELED].includes(paymentStatus)) {
+    if (paymentStatus && [Types.TPagSeguroPaymentStatus.CANCELED].includes(paymentStatus)) {
       return true
     }
     const pagseguroHelper = new Helpers.PagseguroHelper(this.logger)
@@ -449,8 +450,8 @@ export default class WebHooks {
       )
       return error.logAndReturn(this.logger)
     }
-    const cancelPaymentObject: Types.Classes.Pagseguro.CPagSeguroCreateCharge =
-      Types.Classes.Pagseguro.CPagSeguroCreateCharge.fromObject({
+    const cancelPaymentObject: Classes.Pagseguro.CPagSeguroCreateCharge =
+      Classes.Pagseguro.CPagSeguroCreateCharge.fromObject({
         id: paymentObject.id,
         amount: paymentObject.amount?.value
       })
