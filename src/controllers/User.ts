@@ -1,21 +1,12 @@
-import {
-  Domain,
-  Utils,
-  BackendTypes,
-  Logics,
-  Helpers,
-  Types,
-  DBModels,
-  objHasProp,
-  slugging
-} from '@ikomida/shared-backend'
+import { Domain, Utils, Logics, Helpers, DBModels, objHasProp, slugging } from '@ikomida/shared-backend'
 import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/src/Utils/iKomidaError'
+import { Classes, Types } from '@ikomida/shared-types'
 
 const supportedPaymentMethodTypes = [
-  Types.Types.TPaymentMethod.CASH_ON_DELIVERY,
-  Types.Types.TPaymentMethod.CREDIT_CARD_ON_DELIVERY,
-  Types.Types.TPaymentMethod.DEBT_CARD_ON_DELIVERY,
-  Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
+  Types.TPaymentMethod.CASH_ON_DELIVERY,
+  Types.TPaymentMethod.CREDIT_CARD_ON_DELIVERY,
+  Types.TPaymentMethod.DEBT_CARD_ON_DELIVERY,
+  Types.TPaymentMethod.CREDIT_CARD_ONLINE
 ]
 
 export default class User {
@@ -34,9 +25,9 @@ export default class User {
     this.logger = logger
   }
 
-  async addCoupon(identity: Types.Classes.CUser, input: any) {
+  async addCoupon(identity: Classes.CUser, input: any) {
     try {
-      const payload: Types.Classes.CCoupon = Types.Classes.CCoupon.fromObject(input)
+      const payload: Classes.CCoupon = Classes.CCoupon.fromObject(input)
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
           ikomidaID: identity.ikomidaID
@@ -48,7 +39,7 @@ export default class User {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.CLIENT]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.CLIENT]
               }
             }
           },
@@ -87,18 +78,18 @@ export default class User {
         )
         return error.logAndReturn(this.logger)
       }
-      const coupon = Types.Classes.CCoupon.init(
+      const coupon = Classes.CCoupon.init(
         couponModels?.[0]?.name ?? '',
         couponModels?.[0]?.value ?? 0,
         couponModels?.[0]?.minValue ?? 0,
-        couponModels?.[0]?.valueType ?? Types.Types.TDiscount.NO,
+        couponModels?.[0]?.valueType ?? Types.TDiscount.NO,
         undefined,
         undefined,
         undefined,
         undefined,
         couponModels?.[0]?.id
       )
-      return new Utils.Return(true, coupon)
+      return new Classes.Return(true, coupon)
     } catch (exception: any) {
       this.logger.error(exception)
       const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_ADD_COUPON_ERROR)
@@ -106,7 +97,7 @@ export default class User {
     }
   }
 
-  async getPaymentMethods(identity: Types.Classes.CUser) {
+  async getPaymentMethods(identity: Classes.CUser) {
     try {
       const userPaymentModels = await this.getUserPaymentModels(identity)
       if ('success' in userPaymentModels) {
@@ -114,12 +105,12 @@ export default class User {
       }
       const userModel = userPaymentModels?.userModel
       const userCreditCardModels = userPaymentModels.userCreditCardModels
-      const userPreferredPaymentMethodType = userModel?.paymentMethodType ?? Types.Types.TPaymentMethod.CASH_ON_DELIVERY
-      const isOnlineCreditCard = userPreferredPaymentMethodType === Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
+      const userPreferredPaymentMethodType = userModel?.paymentMethodType ?? Types.TPaymentMethod.CASH_ON_DELIVERY
+      const isOnlineCreditCard = userPreferredPaymentMethodType === Types.TPaymentMethod.CREDIT_CARD_ONLINE
       const paymentMethods =
         userCreditCardModels?.map(paymentMethodModel => {
-          return Types.Classes.CPaymentMethod.init(
-            paymentMethodModel?.type ?? Types.Types.TPaymentMethod.CASH_ON_DELIVERY,
+          return Classes.CPaymentMethod.init(
+            paymentMethodModel?.type ?? Types.TPaymentMethod.CASH_ON_DELIVERY,
             paymentMethodModel?.brand ?? '-',
             paymentMethodModel?.lastDigits ?? '',
             paymentMethodModel?.firstDigits,
@@ -129,9 +120,9 @@ export default class User {
           )
         }) ?? []
       for (const supportedPaymentMethodType of supportedPaymentMethodTypes) {
-        if (supportedPaymentMethodType !== Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE) {
+        if (supportedPaymentMethodType !== Types.TPaymentMethod.CREDIT_CARD_ONLINE) {
           paymentMethods?.push(
-            Types.Classes.CPaymentMethod.init(
+            Classes.CPaymentMethod.init(
               supportedPaymentMethodType,
               '',
               '',
@@ -143,7 +134,7 @@ export default class User {
           )
         }
       }
-      return new Utils.Return(true, paymentMethods)
+      return new Classes.Return(true, paymentMethods)
     } catch (exception: any) {
       const error = new Utils.iKomidaError(
         Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION,
@@ -153,10 +144,10 @@ export default class User {
     }
   }
 
-  async newCreditCard(identity: Types.Classes.CUser, input: any) {
+  async newCreditCard(identity: Classes.CUser, input: any) {
     this.logger.info('---newCreditCard:')
     try {
-      const payload: Types.Classes.CCreditCardRequest = Types.Classes.CCreditCardRequest.fromObject(input)
+      const payload: Classes.CCreditCardRequest = Classes.CCreditCardRequest.fromObject(input)
       if (!payload.validate() || !this.validatenewCreditCard(payload)) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_MISSING_DATA)
       }
@@ -181,18 +172,18 @@ export default class User {
           Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_INVALID_VENDOR_PAYMENT_SETTINGS
         )
       }
-      const createChargeObject = Types.Classes.Pagseguro.CPagSeguroCreateCharge.init(
+      const createChargeObject = Classes.Pagseguro.CPagSeguroCreateCharge.init(
         identity.ikomidaID ?? '',
         Logics.Finances.random(100, 199),
-        Types.Types.Pagseguro.TPagSeguroPaymentMethod.CREDIT_CARD,
+        Types.Pagseguro.TPagSeguroPaymentMethod.CREDIT_CARD,
         slugging(vendorSettingsModel?.contractName),
-        Types.Classes.Pagseguro.CPagseguroCreateChargeConfig.fromObject({
+        Classes.Pagseguro.CPagseguroCreateChargeConfig.fromObject({
           host: pagseguroHelper?.host,
           uri: pagseguroHelper?.uri
         }),
         contractModel?.id,
-        Types.Classes.Pagseguro.CPagSeguroCard.init(
-          Types.Classes.Pagseguro.CPagSeguroCardHolder.fromObject({ name: payload.holder }),
+        Classes.Pagseguro.CPagSeguroCard.init(
+          Classes.Pagseguro.CPagSeguroCardHolder.fromObject({ name: payload.holder }),
           Number(payload.number),
           undefined,
           Number(payload.validity?.substring(0, 2)),
@@ -207,13 +198,13 @@ export default class User {
       if (!chargeResult) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      if (chargeResult instanceof Types.Types.TPagSeguroPaymentStatus) {
+      if (chargeResult instanceof Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           chargeResult.description
         )
       }
-      if (!(chargeResult instanceof Types.Classes.Pagseguro.CChargeResponse)) {
+      if (!(chargeResult instanceof Classes.Pagseguro.CChargeResponse)) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       const userPaymentModel = await userModel?.$create('userPayment', {
@@ -227,7 +218,7 @@ export default class User {
         contractId: contractModel.id
       })
       try {
-        const paymentPayload = new Types.Classes.CAMQPPayload<string>({
+        const paymentPayload = new Classes.CAMQPPayload<string>({
           method: 'cancelPayment',
           object: userPaymentModel?.id
         })
@@ -248,7 +239,7 @@ export default class User {
         })
       }
       const userCreditCard = await userModel?.$create('userCreditCard', {
-        type: Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE,
+        type: Types.TPaymentMethod.CREDIT_CARD_ONLINE,
         brand: chargeResult?.brand,
         firstDigits: chargeResult?.firstDigits,
         lastDigits: chargeResult?.lastDigits,
@@ -259,10 +250,10 @@ export default class User {
         await userCreditCard?.$add('userPayment', userPaymentModel)
       }
       if (userModel) {
-        userModel.paymentMethodType = Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
+        userModel.paymentMethodType = Types.TPaymentMethod.CREDIT_CARD_ONLINE
       }
       await userModel?.save()
-      return new Utils.Return(true)
+      return new Classes.Return(true)
     } catch (exception: any) {
       let error = new Utils.iKomidaError(
         Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION,
@@ -275,9 +266,9 @@ export default class User {
     }
   }
 
-  async updatePaymentMethod(identity: Types.Classes.CUser, id?: string) {
+  async updatePaymentMethod(identity: Classes.CUser, id?: string) {
     try {
-      const selectedrPaymentMethod: Types.Types.TPaymentMethod | null = Types.Types.TPaymentMethod.valueOf(id)
+      const selectedrPaymentMethod: Types.TPaymentMethod | null = Types.TPaymentMethod.valueOf(id)
       if (
         selectedrPaymentMethod &&
         !supportedPaymentMethodTypes.includes(selectedrPaymentMethod) &&
@@ -306,11 +297,11 @@ export default class User {
         userModel.paymentMethodType = !(
           selectedrPaymentMethod && supportedPaymentMethodTypes.includes(selectedrPaymentMethod)
         )
-          ? Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE
+          ? Types.TPaymentMethod.CREDIT_CARD_ONLINE
           : selectedrPaymentMethod
       }
       await userModel?.save()
-      return new Utils.Return(true)
+      return new Classes.Return(true)
     } catch (exception: any) {
       const error = new Utils.iKomidaError(
         Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION,
@@ -320,9 +311,9 @@ export default class User {
     }
   }
 
-  async removePaymentMethod(identity: Types.Classes.CUser, id?: string) {
+  async removePaymentMethod(identity: Classes.CUser, id?: string) {
     try {
-      const selectedrPaymentMethod: Types.Types.TPaymentMethod | null = Types.Types.TPaymentMethod.valueOf(id)
+      const selectedrPaymentMethod: Types.TPaymentMethod | null = Types.TPaymentMethod.valueOf(id)
       if (
         selectedrPaymentMethod &&
         !supportedPaymentMethodTypes.includes(selectedrPaymentMethod) &&
@@ -358,14 +349,14 @@ export default class User {
         }
         userCreditCardModels = userCreditCardModels?.filter(item => !item?.deletedAt)
         if (
-          Types.Types.TPaymentMethod.CREDIT_CARD_ONLINE === userModel?.paymentMethodType &&
+          Types.TPaymentMethod.CREDIT_CARD_ONLINE === userModel?.paymentMethodType &&
           (userCreditCardModels?.length ?? 0) === 0
         ) {
-          userModel.paymentMethodType = Types.Types.TPaymentMethod.CASH_ON_DELIVERY
+          userModel.paymentMethodType = Types.TPaymentMethod.CASH_ON_DELIVERY
           await userModel?.save()
         }
       }
-      return new Utils.Return(true)
+      return new Classes.Return(true)
     } catch (exception: any) {
       const error = new Utils.iKomidaError(
         Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_PAYMENT_METHOD_EXCEPTION,
@@ -375,7 +366,7 @@ export default class User {
     }
   }
 
-  async getUserPaymentModels(identity: Types.Classes.CUser) {
+  async getUserPaymentModels(identity: Classes.CUser) {
     const contractModel = await DBModels.ContractModel.findOne({
       where: {
         ikomidaID: identity.ikomidaID
@@ -387,7 +378,7 @@ export default class User {
           where: {
             id: identity.id,
             role: {
-              [Domain.SqlDB.Op.in]: [Types.Types.TRoles.CLIENT]
+              [Domain.SqlDB.Op.in]: [Types.TRoles.CLIENT]
             }
           },
           include: [

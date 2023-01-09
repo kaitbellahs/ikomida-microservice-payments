@@ -1,5 +1,7 @@
-import { Types, Domain, Utils, BackendTypes, Helpers, DBModels, slugging, objHasProp } from '@ikomida/shared-backend'
+import { Domain, Utils, Helpers, DBModels, slugging, objHasProp, BackendTypes } from '@ikomida/shared-backend'
 import { IiKomidaErrorModel } from '@ikomida/shared-backend/lib/src/Utils/iKomidaError'
+import { Classes, Types } from '@ikomida/shared-types'
+import User from './User.js'
 
 export default class Payments {
   IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR: IiKomidaErrorModel = {
@@ -12,10 +14,10 @@ export default class Payments {
     this.logger = logger
   }
 
-  async cancelPayment(identity: Types.Classes.CUser, input: any) {
+  async cancelPayment(identity: Classes.CUser, input: any) {
     try {
       this.logger.info('---cancelPayment')
-      const object: Types.Classes.CProcessPaymentResponse = Types.Classes.CProcessPaymentResponse.fromObject(input)
+      const object: Classes.CProcessPaymentResponse = Classes.CProcessPaymentResponse.fromObject(input)
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
           ikomidaID: identity.ikomidaID
@@ -27,12 +29,7 @@ export default class Payments {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [
-                  Types.Types.TRoles.ADMIN,
-                  Types.Types.TRoles.CLIENT,
-                  Types.Types.TRoles.VENDOR,
-                  Types.Types.TRoles.STAFF
-                ]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.CLIENT, Types.TRoles.VENDOR, Types.TRoles.STAFF]
               }
             }
           },
@@ -75,10 +72,10 @@ export default class Payments {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_INVALID_USER_PAYMENT)
       }
       const userPaymentModel = userPaymentModels[0]
-      const cancelPaymentObject = Types.Classes.Pagseguro.CPagSeguroCreateCharge.init(
+      const cancelPaymentObject = Classes.Pagseguro.CPagSeguroCreateCharge.init(
         '',
         userPaymentModel.amount ?? 0,
-        Types.Types.Pagseguro.TPagSeguroPaymentMethod.CREDIT_CARD,
+        Types.Pagseguro.TPagSeguroPaymentMethod.CREDIT_CARD,
         '',
         undefined,
         undefined,
@@ -92,18 +89,18 @@ export default class Payments {
       if (!cancelCharge) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_CANCEL_PAYMENT_RESPONSE_ERROR)
       }
-      if (cancelCharge instanceof Types.Types.TPagSeguroPaymentStatus) {
+      if (cancelCharge instanceof Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           cancelCharge.description
         )
       }
-      if (!(cancelCharge instanceof Types.Classes.Pagseguro.CChargeResponse)) {
+      if (!(cancelCharge instanceof Classes.Pagseguro.CChargeResponse)) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       userPaymentModel.status = cancelCharge.status
       await userPaymentModel.save()
-      return new Utils.Return(true, cancelCharge)
+      return new Classes.Return(true, cancelCharge)
     } catch (exception: any) {
       let error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PRODUCTS_SERVICE_NEW_PRODUCT_EXCEPTION, exception)
       if (exception instanceof Utils.iKomidaError) {
@@ -112,9 +109,9 @@ export default class Payments {
       return error.logAndReturn(this.logger)
     }
   }
-  async processPayment(identity: Types.Classes.CUser, input: any) {
+  async processPayment(identity: Classes.CUser, input: any, user: User) {
     try {
-      const object: Types.Classes.CProcessPayment = Types.Classes.CProcessPayment.fromObject(input)
+      const object: Classes.CProcessPayment = Classes.CProcessPayment.fromObject(input)
       this.logger.info('---processPayment')
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -127,12 +124,7 @@ export default class Payments {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [
-                  Types.Types.TRoles.ADMIN,
-                  Types.Types.TRoles.CLIENT,
-                  Types.Types.TRoles.VENDOR,
-                  Types.Types.TRoles.STAFF
-                ]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.CLIENT, Types.TRoles.VENDOR, Types.TRoles.STAFF]
               }
             },
             include: [
@@ -191,29 +183,37 @@ export default class Payments {
       if (!userCreditCard?.type) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      const chargeObject: Types.Classes.Pagseguro.CPagSeguroCreateCharge =
-        Types.Classes.Pagseguro.CPagSeguroCreateCharge.init(
-          object.referenceId,
-          object.amount,
-          userCreditCard.type.pagseguro,
-          slugging(vendorSettingsModel?.contractName),
-          undefined,
-          contractModel?.id,
-          undefined,
-          userCreditCard?.token,
-          object?.description ?? `iKomida/${contractModel?.contractName}`
-        )
+      const chargeObject: Classes.Pagseguro.CPagSeguroCreateCharge = Classes.Pagseguro.CPagSeguroCreateCharge.init(
+        object.referenceId,
+        object.amount,
+        userCreditCard.type.pagseguro,
+        slugging(vendorSettingsModel?.contractName),
+        undefined,
+        contractModel?.id,
+        undefined,
+        userCreditCard?.token,
+        object?.description ?? `iKomida/${contractModel?.contractName}`
+      )
       const chargeResult = await paymentGateway?.createCharge(chargeObject)
       if (!chargeResult) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
-      if (chargeResult instanceof Types.Types.TPagSeguroPaymentStatus) {
+      if (chargeResult instanceof Types.TPagSeguroPaymentStatus) {
         throw new Utils.iKomidaError(
           this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
           chargeResult.description
         )
       }
-      if (!(chargeResult instanceof Types.Classes.Pagseguro.CChargeResponse)) {
+      if (chargeResult instanceof BackendTypes.TPagseguroCharge) {
+        if (chargeResult === BackendTypes.TPagseguroCharge.INVALID_CARD_ID) {
+          await user.removePaymentMethod(identity, userCreditCard.id)
+        }
+        throw new Utils.iKomidaError(
+          this.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_GENERIC_ERROR,
+          chargeResult.description
+        )
+      }
+      if (!(chargeResult instanceof Classes.Pagseguro.CChargeResponse)) {
         throw new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_PROCESS_PAYMENT_CREATE_CHARGE_ERROR)
       }
       const userPaymentModel = await userModel.$create('userPayment', {
@@ -228,7 +228,7 @@ export default class Payments {
         contractId: contractModel.id,
         userCreditCardId: userCreditCard.id
       })
-      return new Utils.Return(true, Types.Classes.CProcessPaymentResponse.init(userPaymentModel.id))
+      return new Classes.Return(true, Classes.CProcessPaymentResponse.init(userPaymentModel.id))
     } catch (exception: any) {
       let error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PRODUCTS_SERVICE_NEW_PRODUCT_EXCEPTION, exception)
       if (exception instanceof Utils.iKomidaError) {
