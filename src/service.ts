@@ -4,7 +4,7 @@ import Payments from './controllers/Payments.js'
 import WebHooks from './controllers/WebHooks.js'
 import User from './controllers/User.js'
 import Vendor from './controllers/Vendor.js'
-import { BackendTypes, Types, Utils } from '@ikomida/shared-backend'
+import { Types, Utils } from '@ikomida/shared-backend'
 
 import { createRequire } from 'module'
 const require = createRequire(import.meta.url)
@@ -52,7 +52,7 @@ app.delete('/payment/:id', async (req, res) => {
 })
 
 app.post('/processPayment', async (req, res) => {
-  const payload = await payments.processPayment(Types.Classes.CUser.fromObject(req.headers?.identity), req.body)
+  const payload = await payments.processPayment(Types.Classes.CUser.fromObject(req.headers?.identity), req.body, user)
   res.status(payload?.success ? 201 : 200).sendResponse(payload)
 })
 
