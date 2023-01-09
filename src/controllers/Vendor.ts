@@ -1,4 +1,6 @@
-import { Domain, Utils, Logics, Types, DBModels } from '@ikomida/shared-backend'
+import { Domain, Utils, DBModels } from '@ikomida/shared-backend'
+import { DateTime, Finances } from '@ikomida/shared-logics'
+import { Classes, Types } from '@ikomida/shared-types'
 
 export default class Vendor {
   logger
@@ -8,11 +10,11 @@ export default class Vendor {
     this.logger = logger
   }
 
-  async newCoupon(identity: Types.Classes.CUser, input: any) {
+  async newCoupon(identity: Classes.CUser, input: any) {
     try {
-      const coupon: Types.Classes.CCoupon = Types.Classes.CCoupon.fromObject(input)
+      const coupon: Classes.CCoupon = Classes.CCoupon.fromObject(input)
       const role = identity.role
-      if (!coupon.validate() || !role || ![Types.Types.TRoles.VENDOR, Types.Types.TRoles.STAFF].includes(role)) {
+      if (!coupon.validate() || !role || ![Types.TRoles.VENDOR, Types.TRoles.STAFF].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_NEW_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
@@ -27,7 +29,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR, Types.Types.TRoles.STAFF]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.VENDOR, Types.TRoles.STAFF]
               }
             }
           },
@@ -60,23 +62,23 @@ export default class Vendor {
       await contractModel.$create('coupon', {
         name: coupon.name,
         validity: coupon.validity,
-        value: Logics.Finances.toFinanceNumber(coupon.value),
-        minValue: Logics.Finances.toFinanceNumber(coupon.minValue),
+        value: Finances.toFinanceNumber(coupon.value),
+        minValue: Finances.toFinanceNumber(coupon.minValue),
         valueType: coupon.valueType,
         orderTypes: coupon.orderTypes,
         quantity: coupon.quantity ? coupon.quantity : 0
       })
-      return new Utils.Return(true)
+      return new Classes.Return(true)
     } catch (e) {
       this.logger.error(e)
     }
-    return new Utils.Return(false)
+    return new Classes.Return(false)
   }
 
-  async removeCoupon(identity: Types.Classes.CUser, id?: string) {
+  async removeCoupon(identity: Classes.CUser, id?: string) {
     try {
       const role = identity.role
-      if (!role || ![Types.Types.TRoles.VENDOR, Types.Types.TRoles.ADMIN].includes(role)) {
+      if (!role || ![Types.TRoles.VENDOR, Types.TRoles.ADMIN].includes(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_REMOVE_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
@@ -91,7 +93,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.VENDOR]
               }
             }
           },
@@ -114,28 +116,28 @@ export default class Vendor {
         return error.logAndReturn(this.logger)
       }
       await couponModels[0].destroy()
-      return new Utils.Return(true)
+      return new Classes.Return(true)
     } catch (exception: any) {
       this.logger.error(exception)
-      return new Utils.Return(false)
+      return new Classes.Return(false)
     }
   }
 
-  async getCoupons(identity: Types.Classes.CUser, timestamp = 0) {
+  async getCoupons(identity: Classes.CUser, timestamp = 0) {
     try {
       const role = identity.role
-      console.log('role:', Types.Types.TRoles.isVendor(role), role)
-      if (!Types.Types.TRoles.isVendor(role)) {
+      console.log('role:', Types.TRoles.isVendor(role), role)
+      if (!Types.TRoles.isVendor(role)) {
         const error = new Utils.iKomidaError(Utils.iKomidaError.IKOMIDA_PAYMENTS_SERVICE_GET_COUPON_VENDOR)
         return error.logAndReturn(this.logger)
       }
       const where =
-        timestamp && timestamp != 0 && Number(Logics.Finances.toNumber(timestamp)) == timestamp
+        timestamp && timestamp != 0 && Number(Finances.toNumber(timestamp)) == timestamp
           ? {
-            createdAt: {
-              [Domain.SqlDB.Op.lt]: new Date(Number(Logics.Finances.toNumber(timestamp)))
+              createdAt: {
+                [Domain.SqlDB.Op.lt]: new Date(Number(Finances.toNumber(timestamp)))
+              }
             }
-          }
           : null
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -148,7 +150,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.VENDOR]
               }
             }
           },
@@ -171,11 +173,11 @@ export default class Vendor {
       const couponModels = contractModel?.coupons
 
       const coupons = couponModels?.map(couponModel => {
-        return Types.Classes.CCoupon.init(
+        return Classes.CCoupon.init(
           couponModel.name ?? '-',
           couponModel.value ?? 0,
           couponModel.minValue ?? 0,
-          couponModel.valueType ?? Types.Types.TDiscount.NO,
+          couponModel.valueType ?? Types.TDiscount.NO,
           couponModel.quantity,
           couponModel.validity,
           couponModel.orderTypes,
@@ -184,20 +186,20 @@ export default class Vendor {
           couponModel?.createdAt.getTime()
         )
       })
-      return new Utils.Return(
+      return new Classes.Return(
         true,
         coupons?.sort((item1, item2) => (item2?.timestamp ?? 0) - (item1?.timestamp ?? 0))
       )
     } catch (exception: any) {
       this.logger.error(exception)
-      return new Utils.Return(false)
+      return new Classes.Return(false)
     }
   }
 
-  async getCouponsCount(identity: Types.Classes.CUser) {
+  async getCouponsCount(identity: Classes.CUser) {
     const role = identity.role
-    if (!Types.Types.TRoles.isVendor(role)) {
-      return new Utils.Return(false, 0)
+    if (!Types.TRoles.isVendor(role)) {
+      return new Classes.Return(false, 0)
     }
     const contractModel = await DBModels.ContractModel.findOne({
       where: {
@@ -210,7 +212,7 @@ export default class Vendor {
           where: {
             id: identity.id,
             role: {
-              [Domain.SqlDB.Op.in]: [Types.Types.TRoles.ADMIN, Types.Types.TRoles.VENDOR]
+              [Domain.SqlDB.Op.in]: [Types.TRoles.ADMIN, Types.TRoles.VENDOR]
             }
           }
         },
@@ -227,12 +229,12 @@ export default class Vendor {
       return error.logAndReturn(this.logger)
     }
     const couponModels = contractModel?.coupons
-    return new Utils.Return(true, couponModels?.length)
+    return new Classes.Return(true, couponModels?.length)
   }
 
-  async getSubscription(identity: Types.Classes.CUser) {
+  async getSubscription(identity: Classes.CUser) {
     try {
-      const dueDate = Logics.DateTime?.parseAsaasDate(Logics.DateTime?.localToday())
+      const dueDate = DateTime?.parseAsaasDate(DateTime?.localToday())
       dueDate.setDate(dueDate.getDate() + 30)
       const contractModel = await DBModels.ContractModel.findOne({
         where: {
@@ -245,7 +247,7 @@ export default class Vendor {
             where: {
               id: identity.id,
               role: {
-                [Domain.SqlDB.Op.in]: [Types.Types.TRoles.VENDOR]
+                [Domain.SqlDB.Op.in]: [Types.TRoles.VENDOR]
               }
             }
           },
@@ -294,26 +296,26 @@ export default class Vendor {
       const chargeModels = contractPaymentSignature?.contractPayments
       const charges =
         chargeModels?.map(charge => {
-          return Types.Classes.CSubscriptionCharge.init(
+          return Classes.CSubscriptionCharge.init(
             charge?.value ?? 0,
             charge?.creditCardNumber ?? 0,
             charge?.creditCardBrand ?? '-',
             charge?.dueDate ?? new Date(),
-            charge?.status ?? Types.Types.TAsaasPaymentStatus.PENDING,
+            charge?.status ?? Types.TAsaasPaymentStatus.PENDING,
             charge?.invoiceUrl ?? undefined,
             charge?.transactionReceiptUrl ?? undefined,
             charge?.confirmedDate ?? undefined
           )
         }) ?? []
-      const subscriptionObject = Types.Classes.CSubscription.init(
+      const subscriptionObject = Classes.CSubscription.init(
         planModel?.name ?? '-',
         contractPaymentSignature?.value ?? 0,
         contractPaymentSignature?.createdAt,
-        contractPaymentSignature?.status ?? Types.Types.TAsaasSignatureStatus.CANCELED,
+        contractPaymentSignature?.status ?? Types.TAsaasSignatureStatus.CANCELED,
         contractPaymentSignature?.nextDueDate ?? new Date(),
         charges
       )
-      return new Utils.Return(true, subscriptionObject)
+      return new Classes.Return(true, subscriptionObject)
     } catch (exception: any) {
       this.logger.warn(exception)
       const error = new Utils.iKomidaError(
